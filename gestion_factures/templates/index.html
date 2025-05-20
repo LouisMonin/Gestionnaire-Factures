@@ -1,0 +1,215 @@
+<!-- Template HTML pour un site de gestion de facture de qualité premium et design épuré avec des visuels dans les cartes -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>FactuPro - Gestionnaire de factures</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #f9fcff, #edf3f9);
+            margin: 0;
+            padding: 0;
+            color: #1f2d3d;
+        }
+
+        .header {
+            background-color: #fff;
+            border-bottom: 1px solid #dee2e6;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 60px 20px 30px;
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .hero-text {
+            max-width: 580px;
+        }
+
+        .hero-text h1 {
+            font-size: 2.7em;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #1c273c;
+        }
+
+        .hero-text p {
+            font-size: 1.15em;
+            color: #5f6b7a;
+            margin-bottom: 30px;
+        }
+
+        .hero-text a.button {
+            background-color: #00b894;
+            color: #fff;
+            padding: 14px 28px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .hero-text a.button:hover {
+            background-color: #019e7d;
+        }
+
+        .hero-img {
+            max-width: 460px;
+            flex: 1;
+        }
+
+        .hero-img img {
+            width: 100%;
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .dashboard-card {
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            padding: 24px;
+            text-decoration: none;
+            color: #1c273c;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+        }
+
+        .dashboard-card img {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 16px;
+        }
+
+        .dashboard-card h2 {
+            font-size: 1.25em;
+            margin: 0 0 10px;
+            color: #007bff;
+        }
+
+        .dashboard-card p {
+            font-size: 0.95em;
+            color: #5f6b7a;
+            margin: 0;
+        }
+
+        .footer {
+            background-color: #1f2937;
+            color: #ccc;
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 60px;
+        }
+
+        .footer .links {
+            margin-top: 12px;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .footer a {
+            color: #bbb;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/static/logo.png" alt="Logo" style="height: 100px;">
+        </div>
+        <div class="user-info" style="text-align: right; padding: 15px 25px; font-size: 0.95em;">
+            Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
+            <a href="/logout" style="color: #007bff; text-decoration: none;">Se déconnecter</a>
+          </div>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <div class="hero-text">
+                <h1>Créez et gérez vos factures en toute simplicité</h1>
+                <p>Importez, consultez et analysez vos factures avec une interface intuitive, fluide et moderne. Idéal pour les indépendants et PME.</p>
+                <a href="/upload" class="button">Commencer maintenant</a>
+            </div>
+            <div class="hero-img">
+                <img src="/static/photo.png" alt="Illustration gestion facture">
+            </div>
+        </section>
+
+        <div class="dashboard">
+            <a class="dashboard-card" href="/upload">
+                <img src="/static/icons/importer.svg" alt="Importer">
+                <h2>Importer une facture</h2>
+                <p>Ajoutez une nouvelle facture et extrayez automatiquement ses données.</p>
+            </a>
+
+            <a class="dashboard-card" href="/factures">
+                <img src="/static/icons/liste.svg" alt="Factures">
+                <h2>Voir les factures</h2>
+                <p>Consultez et gérez vos factures depuis une interface claire et lisible.</p>
+            </a>
+
+            <a class="dashboard-card" href="/factures/json/page">
+                <img src="/static/icons/json.svg" alt="JSON">
+                <h2>Format JSON</h2>
+                <p>Explorez les données des factures au format brut JSON pour analyse avancée.</p>
+            </a>
+
+            <a class="dashboard-card" href="/analyse">
+                <img src="/static/icons/chart.svg" alt="Analyse">
+                <h2>Analyse graphique</h2>
+                <p>Visualisez les dépenses selon la date et les fournisseurs avec des graphiques clairs.</p>
+            </a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="links">
+            <a href="#">Mentions légales</a>
+            <a href="#">Politique de confidentialité</a>
+            <a href="#">Conditions d'utilisation</a>
+        </div>
+        <p>&copy; 2025 FactuPro. Tous droits réservés.</p>
+    </footer>
+</body>
+</html>

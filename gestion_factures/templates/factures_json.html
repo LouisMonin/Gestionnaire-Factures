@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Factures JSON</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            background: linear-gradient(to bottom right, #f4f9fd, #edf3f9);
+            color: #2c3e50;
+        }
+        .header {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 20px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .logo img {
+            height: 50px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+        }
+        pre {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        a.button {
+            display: inline-block;
+            margin: 40px auto 0;
+            padding: 12px 28px;
+            background-color: #00b894;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+        }
+        .footer {
+            background-color: #1f2937;
+            color: #ccc;
+            padding: 40px 20px;
+            text-align: center;
+            font-size: 0.9em;
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <img src="/static/logo.png" alt="Logo" style="height: 100px;">
+        </div>
+        <div class="user-info" style="text-align: right; padding: 15px 25px; font-size: 0.95em;">
+            Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
+            <a href="/logout" style="color: #007bff; text-decoration: none;">Se déconnecter</a>
+          </div>
+    </header>
+
+    <div class="container">
+        <h1>Factures (JSON)</h1>
+        <pre>{{ factures | tojson(indent=2) }}</pre>
+        <div style="text-align:center">
+            <a href="/" class="button">⬅ Retour à l’accueil</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 FactuPro — Tous droits réservés</p>
+    </footer>
+</body>
+</html>
