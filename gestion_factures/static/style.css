@@ -148,22 +148,53 @@ button, a.button {
 }
 
 form.form-filtres {
-    text-align: center;
+    text-align: left; /* alignement à gauche, plus naturel */
     background-color: #fff;
     padding: 30px;
     border-radius: 16px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
     margin-bottom: 50px;
+
+    display: flex;
+    flex-wrap: wrap; /* passe à la ligne si trop étroit */
+    align-items: center;
+    gap: 15px; /* espace entre éléments */
+    justify-content: center; /* centrer le contenu horizontalement */
 }
 
-form.form-filtres label,
+/* Label : juste du texte, sans cadre ni padding */
+form.form-filtres label {
+    margin: 0;
+    padding: 0;
+    font-weight: normal;
+    white-space: nowrap; /* empêcher le retour à la ligne dans le label */
+}
+
+/* Inputs et selects gardent leur style encadré */
 form.form-filtres select,
 form.form-filtres input[type="date"] {
-    margin: 10px;
+    margin: 10px 0;
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 1em;
+    min-width: 150px; /* largeur minimum pour éviter trop petits */
+}
+
+/* Boutons : un peu de marge pour les séparer */
+form.form-filtres button {
+    margin: 10px 5px 10px 5px;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+/* Optionnel: un bouton rouge pour danger */
+form.form-filtres button.danger {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
 }
 
 .chart-wrapper {

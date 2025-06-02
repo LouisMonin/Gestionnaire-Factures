@@ -56,7 +56,7 @@
 
             <button type="submit" name="action" value="filtrer" class="button">🔎 Filtrer</button>
             <button type="submit" formaction="/export_csv" class="button">⬇️ Export CSV</button>
-            <button type="submit" name="action" value="reset" class="button danger">❌ Réinitialiser</button>
+            <button type="submit" name="action" value="reset" class="button danger">Réinitialiser</button>
         </form>
 
         <div class="chart-wrapper">
@@ -103,7 +103,17 @@
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#666' }
+                        ticks: {
+                            color: '#666',
+                            callback: function(value, index, ticks) {
+                                const dateStr = this.getLabelForValue(value); // récupère la date au format YYYY-MM-DD
+                                const parts = dateStr.split('-'); // découpe en [YYYY, MM, DD]
+                                if (parts.length === 3) {
+                                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // retourne DD-MM-YYYY
+                                }
+                                return dateStr;
+                            }
+                        }
                     },
                     y: {
                         beginAtZero: true,

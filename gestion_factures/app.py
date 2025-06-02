@@ -19,6 +19,7 @@ import csv
 import io
 from pdf2image import convert_from_path
 import pandas as pd
+from datetime import datetime
 
 """ Configuration de l'application Flask """
 
@@ -88,6 +89,35 @@ def logout():
     session.clear()
     return redirect('/login')
 
+
+def normaliser_date(date_str):
+    """
+    Normalise une date en chaîne de caractères au format DD-MM-YYYY.
+    Accepte plusieurs formats d'entrée.
+    """
+    formats_possibles = [
+        "%d/%m/%Y",
+        "%d-%m-%Y",
+        "%Y-%m-%d",
+        "%Y/%m/%d",
+        "%d.%m.%Y",
+        "%Y.%m.%d",
+        "%d/%m/%Y %H:%M",
+        "%Y-%m-%d %H:%M",
+        "%Y/%m/%d %H:%M",
+        "%d-%m-%Y %H:%M:%S",
+        "%Y-%m-%d %H:%M:%S",
+        "%d.%m.%Y %H:%M:%S",
+    ]
+    for fmt in formats_possibles:
+        try:
+            dt = datetime.strptime(date_str.strip(), fmt)
+            return dt.strftime("%Y-%m-%d")
+        except (ValueError, AttributeError):
+            continue
+    return "Date invalide"  # ou None selon votre besoin
+
+
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     """ Route pour télécharger et traiter les factures """
@@ -110,6 +140,7 @@ def upload():
             if extension in ['png', 'jpg', 'jpeg']:
                 texte = ocr_core(chemin_fichier)
                 donnees = extraire_infos(texte)
+                donnees["date_facture"] = normaliser_date(donnees["date_facture"])
                 insert_facture(
                     donnees["fournisseur"],
                     donnees["date_facture"],
@@ -128,6 +159,7 @@ def upload():
                 for page in pages:
                     texte += pytesseract.image_to_string(page)
                 donnees = extraire_infos(texte)
+                donnees["date_facture"] = normaliser_date(donnees["date_facture"])
                 insert_facture(
                     donnees["fournisseur"],
                     donnees["date_facture"],
@@ -149,9 +181,10 @@ def upload():
 
                 lignes_inserees = 0
                 for _, row in df.iterrows():
+                    date_norm = normaliser_date(str(row.get("Date", "Non trouvée")))
                     donnees = {
                         "fournisseur": str(row.get("Fournisseur", "Non trouvé")),
-                        "date_facture": str(row.get("Date", "Non trouvée")),
+                        "date_facture": date_norm,
                         "numero_facture": str(row.get("Numéro de facture", "Non trouvé")),
                         "montant_total": str(row.get("Montant TTC", "Non trouvé")),
                         "TVA": str(row.get("TVA", "Non trouvée"))
@@ -169,8 +202,39 @@ def upload():
 
                 flash(f"✅ {lignes_inserees} facture(s) Excel enregistrée(s) avec succès !", "success")
 
+            elif extension == 'csv':
+                import pandas as pd
+                df = pd.read_csv(chemin_fichier, sep=None, engine='python')  # auto-détection du séparateur
+
+                if df.empty:
+                    flash("❌ Fichier CSV vide ou mal formaté.", "error")
+                    return redirect(url_for('upload'))
+
+                lignes_inserees = 0
+                for _, row in df.iterrows():
+                    date_norm = normaliser_date(str(row.get("Date", "Non trouvée")))
+                    donnees = {
+                        "fournisseur": str(row.get("Fournisseur", "Non trouvé")),
+                        "date_facture": date_norm,
+                        "numero_facture": str(row.get("Numéro de facture", "Non trouvé")),
+                        "montant_total": str(row.get("Montant TTC", "Non trouvé")),
+                        "TVA": str(row.get("TVA", "Non trouvée"))
+                    }
+
+                    insert_facture(
+                        donnees["fournisseur"],
+                        donnees["date_facture"],
+                        donnees["numero_facture"],
+                        donnees["montant_total"],
+                        donnees["TVA"],
+                        session['utilisateur_id']
+                    )
+                    lignes_inserees += 1
+
+                flash(f"✅ {lignes_inserees} facture(s) CSV enregistrée(s) avec succès !", "success")
+
             else:
-                flash("❌ Format non supporté. Utilisez : PNG, JPG, PDF ou Excel.", "error")
+                flash("❌ Format non supporté. Utilisez : PNG, JPG, PDF, Excel ou CSV.", "error")
                 return redirect(url_for('upload'))
 
             return redirect(url_for('accueil'))
@@ -275,6 +339,13 @@ def analyse():
     c.execute(query_repart, params_repart)
     repartition = c.fetchall()
     conn.close()
+
+    try:
+        combined = sorted(zip(dates, montants), key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
+        dates, montants = zip(*combined) if combined else ([], [])
+    except Exception as e:
+        print(f"Erreur tri des dates : {e}")
+
 
     return render_template('analyse.html',
                            dates=dates,
