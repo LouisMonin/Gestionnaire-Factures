@@ -97,3 +97,645 @@ button, a.button {
     border-radius: 6px;
     margin: 15px 0;
 }
+
+/* === Styles spécifiques à analyse.html === */
+
+.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.logo img {
+    height: 60px;
+}
+
+.user-info {
+    text-align: right;
+    padding: 15px 25px;
+    font-size: 0.95em;
+}
+
+.kpi-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 30px 0;
+}
+
+.kpi {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.04);
+    text-align: center;
+}
+
+.kpi h3 {
+    font-size: 1em;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.kpi p {
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #007bff;
+}
+
+form.form-filtres {
+    text-align: center;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+    margin-bottom: 50px;
+}
+
+form.form-filtres label,
+form.form-filtres select,
+form.form-filtres input[type="date"] {
+    margin: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1em;
+}
+
+.chart-wrapper {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    margin-bottom: 40px;
+    padding: 20px;
+    height: 500px;
+}
+
+canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* === Styles spécifiques à factures_json.html === */
+
+.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.logo img {
+    height: 50px;
+}
+
+.user-info {
+    text-align: right;
+    padding: 15px 25px;
+    font-size: 0.95em;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 30px;
+}
+
+pre {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    font-size: 0.95em;
+    line-height: 1.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+a.button {
+    display: inline-block;
+    margin: 40px auto 0;
+    padding: 12px 28px;
+    background-color: #00b894;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+}
+
+a.button:hover {
+    background-color: #009874;
+}
+
+.footer {
+    background-color: #1f2937;
+    color: #ccc;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 0.9em;
+    margin-top: 60px;
+}
+
+/* === Styles spécifiques à factures.html === */
+
+.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.logo img {
+    height: 50px;
+}
+
+.user-info {
+    text-align: right;
+    padding: 15px 25px;
+    font-size: 0.95em;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 2.2em;
+    margin-bottom: 30px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+th, td {
+    padding: 16px;
+    border: 1px solid #dee2e6;
+    text-align: center;
+}
+
+th {
+    background-color: #f1f1f1;
+    font-weight: 600;
+}
+
+form {
+    display: inline;
+}
+
+.button, .danger {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-top: 20px;
+    background-color: #007BFF;
+    color: white;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: #0056b3;
+}
+
+.danger {
+    background-color: #dc3545;
+}
+
+.danger:hover {
+    background-color: #c82333;
+}
+
+.full {
+    display: block;
+    width: 100%;
+    margin-top: 30px;
+}
+
+.footer {
+    background-color: #1f2937;
+    color: #ccc;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 0.9em;
+    margin-top: 60px;
+}
+
+/* === Styles spécifiques à la page d'accueil (index.html) === */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom right, #f9fcff, #edf3f9);
+    margin: 0;
+    padding: 0;
+    color: #1f2d3d;
+}
+
+.header {
+    background-color: #fff;
+    border-bottom: 1px solid #dee2e6;
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.header .logo {
+    display: flex;
+    align-items: center;
+}
+
+.user-info {
+    text-align: right;
+    padding: 15px 25px;
+    font-size: 0.95em;
+}
+
+.container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 60px 20px 30px;
+}
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 40px;
+    margin-bottom: 60px;
+}
+
+.hero-text {
+    max-width: 580px;
+}
+
+.hero-text h1 {
+    font-size: 2.7em;
+    margin-bottom: 20px;
+    font-weight: 700;
+    color: #1c273c;
+}
+
+.hero-text p {
+    font-size: 1.15em;
+    color: #5f6b7a;
+    margin-bottom: 30px;
+}
+
+.hero-text a.button {
+    background-color: #00b894;
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.hero-text a.button:hover {
+    background-color: #019e7d;
+}
+
+.hero-img {
+    max-width: 460px;
+    flex: 1;
+}
+
+.hero-img img {
+    width: 100%;
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+}
+
+.dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.dashboard-card {
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+    padding: 24px;
+    text-decoration: none;
+    color: #1c273c;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-card img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+}
+
+.dashboard-card h2 {
+    font-size: 1.25em;
+    margin: 0 0 10px;
+    color: #007bff;
+}
+
+.dashboard-card p {
+    font-size: 0.95em;
+    color: #5f6b7a;
+    margin: 0;
+}
+
+.footer {
+    background-color: #1f2937;
+    color: #ccc;
+    padding: 40px 20px;
+    text-align: center;
+    font-size: 0.9em;
+    margin-top: 60px;
+}
+
+.footer .links {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    flex-wrap: wrap;
+}
+
+.footer a {
+    color: #bbb;
+    text-decoration: none;
+}
+
+/* === Styles spécifiques à la page de connexion === */
+
+body.login-page {
+    font-family: 'Inter', sans-serif;
+    background: #f7f7fb;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.login-wrapper {
+    text-align: center;
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-wrapper img {
+    height: 60px;
+    margin-bottom: 15px;
+}
+
+.login-wrapper h1 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.login-wrapper p.subtext {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 25px;
+}
+
+.login-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background-color: #5a50f2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.login-box button:hover {
+    background-color: #4339d3;
+}
+
+.switch {
+    margin-top: 20px;
+}
+
+.switch a {
+    color: #5a50f2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.flash {
+    color: #dc3545;
+    margin: 10px 0;
+}
+
+/* === Inscription Page === */
+body.register-page {
+    font-family: 'Inter', sans-serif;
+    background: #f7f7fb;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+}
+
+.register-wrapper {
+    text-align: center;
+    max-width: 500px;
+    width: 100%;
+}
+
+.register-wrapper img {
+    height: 60px;
+    margin-bottom: 15px;
+}
+
+.register-wrapper h1 {
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+.register-wrapper p.subtext {
+    color: #666;
+    font-size: 0.95em;
+    margin-bottom: 25px;
+}
+
+.register-box {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.register-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.register-box button {
+    width: 100%;
+    padding: 12px;
+    background-color: #5a50f2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.register-box button:hover {
+    background-color: #4339d3;
+}
+
+.footer-note {
+    font-size: 0.75em;
+    color: #666;
+    margin-top: 25px;
+    padding: 0 10px;
+}
+
+.footer-note a {
+    color: #5a50f2;
+    text-decoration: underline;
+}
+
+.switch {
+    margin-top: 20px;
+}
+
+.switch a {
+    color: #5a50f2;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.flash {
+    color: #dc3545;
+    margin: 10px 0;
+}
+
+/* === Importer une facture === */
+body.upload-page {
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+    background: linear-gradient(to bottom right, #f4f9fd, #edf3f9);
+    color: #2c3e50;
+}
+
+.container.upload {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 20px;
+}
+
+.upload-page h1 {
+    text-align: center;
+    font-size: 2em;
+    margin-bottom: 30px;
+}
+
+form.upload-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.upload-form input[type="file"] {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.upload-form button {
+    background-color: #00b894;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background-color: #019e7d;
+}
+
+.button.return-home {
+    display: inline-block;
+    margin: 40px auto 0;
+    padding: 12px 28px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+}
