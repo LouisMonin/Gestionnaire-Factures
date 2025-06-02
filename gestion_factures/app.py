@@ -1,3 +1,13 @@
+"""
+# gestion_factures/app.py
+# Application Flask pour la gestion des factures
+# Ce script permet aux utilisateurs de télécharger, analyser et gérer leurs factures.
+# Il inclut des fonctionnalités de connexion, d'inscription, de téléchargement de fichiers, d'analyse OCR et de visualisation des factures.
+# Il utilise SQLite pour stocker les données des factures et des utilisateurs.
+# Il est conçu pour être simple et extensible, avec une interface utilisateur basique en HTML.
+# Il nécessite les bibliothèques Flask, SQLite, pytesseract, PIL (Pillow), pdf2image et pandas.
+# """
+
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for, session, make_response
 from database import init_db, insert_facture, ajouter_utilisateur, verifier_utilisateur
 import os
@@ -10,10 +20,14 @@ import io
 from pdf2image import convert_from_path
 import pandas as pd
 
+""" Configuration de l'application Flask """
+
 app = Flask(__name__)
 app.secret_key = 'ma_clé_secrète'
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+""" Initialisation de la base de données """
 
 @app.before_request
 def verifier_connexion():
@@ -22,12 +36,15 @@ def verifier_connexion():
 
 @app.route('/')
 def accueil():
+    """Route principale de l'application.Cette route redirige vers la page de connexion
+    si l'utilisateur n'est pas connecté."""
     if 'utilisateur_id' not in session:
         return redirect(url_for('login'))
     return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """ Routes pour la gestion des utilisateurs """
     if request.method == 'POST':
         pseudo = request.form['pseudo']
         mot_de_passe = request.form['mot_de_passe']
@@ -45,6 +62,7 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    """ Route pour l'inscription d'un nouvel utilisateur """
     if request.method == 'POST':
         success = ajouter_utilisateur(
             request.form['nom'],
@@ -64,14 +82,15 @@ def register():
 
     return render_template('register.html')
 
-
 @app.route('/logout')
 def logout():
+    """ Route pour la déconnexion de l'utilisateur """
     session.clear()
     return redirect('/login')
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
+    """ Route pour télécharger et traiter les factures """
     if request.method == 'POST':
         if 'facture' not in request.files:
             flash("❌ Aucun fichier sélectionné.", "error")
@@ -162,9 +181,9 @@ def upload():
 
     return render_template('upload.html')
 
-
 @app.route('/factures')
 def afficher_factures():
+    """ Route pour afficher les factures de l'utilisateur """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
@@ -174,6 +193,7 @@ def afficher_factures():
 
 @app.route('/factures/json')
 def factures_json():
+    """ Route pour obtenir les factures en format JSON """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
@@ -186,6 +206,7 @@ def factures_json():
 
 @app.route('/factures/json/page')
 def json_visuel():
+    """ Route pour afficher les factures en format JSON dans une page dédiée """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
@@ -198,6 +219,7 @@ def json_visuel():
 
 @app.route('/analyse', methods=['GET', 'POST'])
 def analyse():
+    """ Route pour analyser les factures """
     if request.method == 'POST' and request.form.get('action') == 'reset':
         return redirect('/analyse')
     conn = sqlite3.connect('factures.db')
@@ -266,6 +288,7 @@ def analyse():
 
 @app.route('/export_csv', methods=['POST'])
 def export_csv():
+    """ Route pour exporter les factures filtrées en CSV """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     fournisseur = request.form.get('fournisseur')
@@ -299,6 +322,7 @@ def export_csv():
 
 @app.route('/supprimer/<int:id>', methods=['POST'])
 def supprimer_facture(id):
+    """ Route pour supprimer une facture spécifique """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('DELETE FROM factures WHERE id = ? AND utilisateur_id = ?', (id, session['utilisateur_id']))
@@ -308,6 +332,7 @@ def supprimer_facture(id):
 
 @app.route('/supprimer_tout', methods=['POST'])
 def supprimer_tout():
+    """ Route pour supprimer toutes les factures de l'utilisateur """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('DELETE FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
@@ -317,12 +342,15 @@ def supprimer_tout():
 
 @app.context_processor
 def injecter_pseudo():
+    """ Route pour afficher le pseudo de l'utilisateur dans les templates """
     return {"pseudo": session.get("pseudo")}
 
 def ocr_core(fichier):
+    """ Fonction pour effectuer l'OCR sur une image ou un PDF """
     return pytesseract.image_to_string(Image.open(fichier))
 
 def extraire_infos(texte):
+    """ Fonction pour extraire les informations d'une facture à partir du texte OCR """
     date = re.search(r'(\d{2}/\d{2}/\d{4})', texte)
     numero = re.search(r'(?:Facture|N\u00b0|No|Num\u00e9ro)[^\d]*(\d+)', texte, re.I)
     montant = re.search(r'(\d+[.,]\d{2}) ?(?:\u20ac|EUR)', texte)
@@ -337,6 +365,7 @@ def extraire_infos(texte):
     }
 
 if __name__ == "__main__":
+    """ Point d'entrée de l'application Flask """
     import webbrowser
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
