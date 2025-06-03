@@ -4,6 +4,38 @@
     <meta charset="UTF-8">
     <title>Importer une facture - FactuPro</title>
     <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        .upload-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .upload-preview embed,
+        .upload-preview img,
+        .upload-preview canvas {
+            max-width: 600px;
+            width: 100%;
+            height: auto;
+            border: 1px solid #ddd;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+        }
+        .upload-preview table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .upload-preview table th,
+        .upload-preview table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            font-size: 14px;
+        }
+        .upload-preview table th {
+            background-color: #f2f2f2;
+        }
+    </style>
 </head>
 <body class="upload-page">
     {% include 'header.html' %}
@@ -11,7 +43,8 @@
     <div class="container upload">
         <h1>Importer une facture</h1>
         <form class="upload-form" method="POST" enctype="multipart/form-data">
-            <input type="file" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
+            <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
+            <div id="preview" class="upload-preview"></div>
             <button type="submit">Envoyer</button>
         </form>
         <div style="text-align:center">
@@ -22,5 +55,55 @@
     <footer class="footer">
         <p>&copy; 2025 FactuPro — Tous droits réservés</p>
     </footer>
+
+    <script>
+        const input = document.getElementById('facture');
+        const preview = document.getElementById('preview');
+
+        input.addEventListener('change', function () {
+            preview.innerHTML = ''; // Reset
+            const file = this.files[0];
+            if (!file) return;
+            const type = file.type;
+
+            if (type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                preview.appendChild(img);
+
+            } else if (type === 'application/pdf') {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                preview.appendChild(canvas);
+
+                const fileReader = new FileReader();
+                fileReader.onload = function() {
+                    const typedarray = new Uint8Array(this.result);
+                    pdfjsLib.getDocument(typedarray).promise.then(pdf => {
+                        pdf.getPage(1).then(page => {
+                            const viewport = page.getViewport({ scale: 1.5 });
+                            canvas.height = viewport.height;
+                            canvas.width = viewport.width;
+                            page.render({ canvasContext: ctx, viewport });
+                        });
+                    });
+                };
+                fileReader.readAsArrayBuffer(file);
+
+            } else if (type === 'text/csv' || file.name.endsWith('.csv') || file.name.endsWith('.xls') || file.name.endsWith('.xlsx')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const html = XLSX.utils.sheet_to_html(sheet);
+                    preview.innerHTML = html;
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                preview.innerHTML = '<p>Format non supporté pour l’aperçu.</p>';
+            }
+        });
+    </script>
 </body>
 </html>
