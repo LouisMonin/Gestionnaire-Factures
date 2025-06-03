@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Analyse des factures</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <header class="header">
-        <div class="logo">
-            <img src="/static/logo.png" alt="Logo">
-        </div>
-        <div class="user-info">
-            Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
-            <a href="/logout">Se déconnecter</a>
-        </div>
-    </header>
+
+    {% include 'header.html' %}
 
     <div class="container">
         <h1>Analyse graphique de vos factures</h1>
-
         <div class="kpi-cards">
             <div class="kpi">
                 <h3>Total facturé</h3>

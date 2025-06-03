@@ -1,20 +1,13 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <title>Factures JSON</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            <img src="/static/logo.png" alt="Logo" style="height: 100px;">
-        </div>
-        <div class="user-info" style="text-align: right; padding: 15px 25px; font-size: 0.95em;">
-            Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
-            <a href="/logout" style="color: #007bff; text-decoration: none;">Se déconnecter</a>
-          </div>
-    </header>
+    {% include 'header.html' %}
 
     <div class="container">
         <h1>Factures (JSON)</h1>

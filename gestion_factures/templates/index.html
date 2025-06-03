@@ -8,22 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <header class="header">
-        <div class="logo">
-            <img src="/static/logo.png" alt="Logo" style="height: 100px;">
-        </div>
-        <div class="user-info" style="text-align: right; padding: 15px 25px; font-size: 0.95em;">
-            Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
-            <a href="/logout" style="color: #007bff; text-decoration: none;">Se déconnecter</a>
-          </div>
-    </header>
-
+    {% include 'header.html' %}
     <div class="container">
         <section class="hero">
             <div class="hero-text">
                 <h1>Créez et gérez vos factures en toute simplicité</h1>
                 <p>Importez, consultez et analysez vos factures avec une interface intuitive, fluide et moderne. Idéal pour les indépendants et PME.</p>
-                <a href="/upload" class="button">Commencer maintenant</a>
             </div>
             <div class="hero-img">
                 <img src="/static/photo.png" alt="Illustration gestion facture">
