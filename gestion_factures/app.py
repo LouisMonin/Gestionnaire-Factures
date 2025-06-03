@@ -19,7 +19,7 @@ import csv
 import io
 from pdf2image import convert_from_path
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, date
 
 """ Configuration de l'application Flask """
 
@@ -306,17 +306,42 @@ def analyse():
 
     c.execute(query, params)
     donnees = c.fetchall()
+
     dates, montants = [], []
-    for date, montant, _ in donnees:
+
+    for date_facture, montant, _ in donnees:
         try:
             # Nettoyage : supprimer € ou autres caractères et convertir proprement
             montant_clean = str(montant).replace('€', '').replace(',', '.').strip()
             montant_float = float(montant_clean)
-            dates.append(date)
+            dates.append(date_facture)
             montants.append(montant_float)
         except Exception as e:
             print(f"Erreur montant: {montant} → {e}")
             continue
+
+    # Récupération de la date actuelle pour les KPI indépendants des filtres
+    today = date.today()
+    debut_annee = today.replace(month=1, day=1).isoformat()
+    debut_mois = today.replace(day=1).isoformat()
+
+    # Factures depuis le 1er janvier
+    c.execute('''
+        SELECT COUNT(*), SUM(REPLACE(montant_total, ",", "."))
+        FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    ''', (session['utilisateur_id'], debut_annee))
+    nb_annee, total_annee = c.fetchone()
+    total_annee = float(total_annee or 0)
+
+    # Factures depuis le 1er du mois
+    c.execute('''
+        SELECT COUNT(*), SUM(REPLACE(montant_total, ",", "."))
+        FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    ''', (session['utilisateur_id'], debut_mois))
+    nb_mois, total_mois = c.fetchone()
+    total_mois = float(total_mois or 0)
 
 
     c.execute('SELECT DISTINCT fournisseur FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
@@ -348,14 +373,19 @@ def analyse():
 
 
     return render_template('analyse.html',
-                           dates=dates,
-                           montants=montants,
-                           fournisseurs=fournisseurs,
-                           fournisseur_actuel=fournisseur,
-                           fournisseurs_repart=[r[0] for r in repartition],
-                           montants_fournisseurs=[float(r[1]) for r in repartition],
-                           date_debut=date_debut,
-                           date_fin=date_fin)
+        dates=dates,
+        montants=montants,
+        fournisseurs=fournisseurs,
+        fournisseur_actuel=fournisseur,
+        fournisseurs_repart=[r[0] for r in repartition],
+        montants_fournisseurs=[float(r[1]) for r in repartition],
+        date_debut=date_debut,
+        date_fin=date_fin,
+        total_annee=total_annee,
+        nb_annee=nb_annee,
+        total_mois=total_mois,
+        nb_mois=nb_mois
+    )
 
 @app.route('/export_csv', methods=['POST'])
 def export_csv():
