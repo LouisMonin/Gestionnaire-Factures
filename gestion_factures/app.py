@@ -365,16 +365,24 @@ def analyse():
     repartition = c.fetchall()
     conn.close()
 
+    # Tri des dates et montants
     try:
         combined = sorted(zip(dates, montants), key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
         dates, montants = zip(*combined) if combined else ([], [])
     except Exception as e:
         print(f"Erreur tri des dates : {e}")
 
+    # Calcul du cumul
+    montants_cumul = []
+    total = 0
+    for montant in montants:
+        total += montant
+        montants_cumul.append(total)
 
     return render_template('analyse.html',
         dates=dates,
         montants=montants,
+        montants_cumul=montants_cumul,
         fournisseurs=fournisseurs,
         fournisseur_actuel=fournisseur,
         fournisseurs_repart=[r[0] for r in repartition],

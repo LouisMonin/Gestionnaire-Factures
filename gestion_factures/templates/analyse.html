@@ -98,23 +98,33 @@
         const pieCtx = document.getElementById('pieChart');
 
         new Chart(evolutionCtx, {
-            type: 'bar',
+            type: 'line',  // courbe
             data: {
                 labels: {{ dates | tojson | safe }},
                 datasets: [{
-                    label: 'Montant total par date (€)',
-                    data: {{ montants | tojson | safe }},
-                    backgroundColor: 'rgba(0,123,255,0.6)',
-                    borderRadius: 8,
-                    barThickness: 30
+                    label: 'Montant cumulé par jour (€)',
+                    data: {{ montants_cumul | tojson | safe }},
+                    backgroundColor: 'rgba(0,123,255,0.2)',
+                    borderColor: 'rgba(0,123,255,1)',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    fill: true,
+                    tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true }
+                    legend: { display: true },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '€' + context.formattedValue;
+                            },
+                        }
+                    }
                 },
                 scales: {
                     x: {
@@ -122,10 +132,10 @@
                         ticks: {
                             color: '#666',
                             callback: function(value, index, ticks) {
-                                const dateStr = this.getLabelForValue(value); // récupère la date au format YYYY-MM-DD
-                                const parts = dateStr.split('-'); // découpe en [YYYY, MM, DD]
+                                const dateStr = this.getLabelForValue(value);
+                                const parts = dateStr.split('-');
                                 if (parts.length === 3) {
-                                    return `${parts[2]}-${parts[1]}-${parts[0]}`; // retourne DD-MM-YYYY
+                                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
                                 }
                                 return dateStr;
                             }
@@ -142,6 +152,8 @@
                 }
             }
         });
+
+
 
         new Chart(pieCtx, {
             type: 'doughnut',
