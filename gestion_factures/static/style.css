@@ -1,7 +1,7 @@
 body {
     font-family: 'Segoe UI', sans-serif;
     background-color: #f8f9fa;
-    color: #333;
+    color: #000000;
     margin: 0;
     padding: 0;
 }
@@ -21,7 +21,7 @@ h1 {
 a.button, button {
     display: inline-block;
     padding: 10px 20px;
-    background-color: #007BFF;
+    background-color: #ff00b3;
     color: white;
     text-decoration: none;
     border-radius: 6px;
