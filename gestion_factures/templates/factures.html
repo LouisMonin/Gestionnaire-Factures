@@ -36,7 +36,11 @@
                 <td>{{ f[5] }}</td>
                 <td>{{ f[4] }}</td>
                 <td>{{ f[11] }}</td>
-                <td>{% if f[8] == 1 %}✅ Oui{% else %}❌ Non{% endif %}</td>
+                <td>
+                    <form action="{{ url_for('toggle_payee', facture_id=f[0]) }}" method="post">
+                        <input type="checkbox" name="payee" {% if f[7] %}checked{% endif %} onchange="this.form.submit()">
+                    </form>
+                  </td>
                 <td>
                     {% if f[6] %}
                         <a href="{{ url_for('telecharger_fichier', filename=f[6]) }}" target="_blank" title="Télécharger">

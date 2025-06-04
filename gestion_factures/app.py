@@ -184,6 +184,35 @@ def afficher_factures():
     conn.close()
     return render_template('factures.html', factures=factures)
 
+#test pour checkbox factures payées
+@app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
+def toggle_payee(facture_id):
+    """ Route pour basculer l'état de paiement d'une facture """
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+
+    # On récupère l'état actuel
+    c.execute(
+        'SELECT payee FROM factures WHERE id = ? AND utilisateur_id = ?',
+        (facture_id, session['utilisateur_id'])
+    )
+    resultat = c.fetchone()
+
+    if resultat is not None:
+        etat_actuel = resultat[0]
+        if etat_actuel is None:
+            etat_actuel = 0
+        nouvel_etat = 0 if etat_actuel else 1
+
+        c.execute(
+            'UPDATE factures SET payee = ? WHERE id = ? AND utilisateur_id = ?',
+            (nouvel_etat, facture_id, session['utilisateur_id'])
+        )
+        conn.commit()
+
+    conn.close()
+    return redirect(url_for('afficher_factures'))
+
 @app.route('/factures/json')
 def factures_json():
     """ Route pour obtenir les factures en format JSON """
@@ -430,3 +459,5 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True)
+
+
