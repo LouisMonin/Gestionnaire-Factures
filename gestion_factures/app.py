@@ -362,7 +362,18 @@ def analyse():
 
     query_repart += ' GROUP BY fournisseur'
     c.execute(query_repart, params_repart)
+
     repartition = c.fetchall()
+
+    # Paiements à venir (factures avec date > aujourd'hui)
+    c.execute('''
+        SELECT id, numero_facture, date_facture, fournisseur, montant_total, TVA
+        FROM factures
+        WHERE utilisateur_id = ? AND date_facture > ?
+        ORDER BY date_facture ASC
+    ''', (session['utilisateur_id'], today.isoformat()))
+    paiements_avenir = c.fetchall()
+
     conn.close()
 
     # Tri des dates et montants
@@ -392,7 +403,8 @@ def analyse():
         total_annee=total_annee,
         nb_annee=nb_annee,
         total_mois=total_mois,
-        nb_mois=nb_mois
+        nb_mois=nb_mois,
+        paiements_avenir=paiements_avenir
     )
 
 @app.route('/export_csv', methods=['POST'])
