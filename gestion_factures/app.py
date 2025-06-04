@@ -134,8 +134,7 @@ def upload():
             tva = request.form.get("tva")
             total_ttc = request.form.get("total_ttc")
             somme_finale = request.form.get("somme_finale")
-            facture_payee = 1 if request.form.get("checkbox_paiement") == "on" else 0
-
+            facture_payee =  0 # Par défaut, on considère que la facture n'est pas payée
             insert_facture(
                 nom_entreprise,
                 date_facture,
