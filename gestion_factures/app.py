@@ -134,7 +134,7 @@ def upload():
             tva = request.form.get("tva")
             total_ttc = request.form.get("total_ttc")
             somme_finale = request.form.get("somme_finale")
-            facture_payee = 1 if request.form.get("facture_payee") == "on" else 0
+            facture_payee = 1 if request.form.get("checkbox_paiement") == "on" else 0
 
             insert_facture(
                 nom_entreprise,
@@ -185,7 +185,7 @@ def afficher_factures():
     factures = c.fetchall()
     conn.close()
 
-    payee_filter = request.args.get('facture_payee')  # '1' si cochée, None sinon
+    payee_filter = request.args.get('checkbox_paiement')  # '1' si cochée, None sinon
     filter_active = request.args.get('filter_active', '0') == '1'  # '1' si le filtre est actif
 
     # Appliquer le filtre uniquement si la case est cochée
