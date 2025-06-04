@@ -13,21 +13,39 @@
         <table>
             <tr>
                 <th>ID</th>
-                <th>Fournisseur</th>
-                <th>Date</th>
-                <th>Numéro</th>
-                <th>Montant</th>
+                <th>Nom entreprise</th>
+                <th>Numéro client</th>
+                <th>Numéro facture</th>
+                <th>Date facture</th>
+                <th>Échéance</th>
                 <th>TVA</th>
+                <th>Total TTC</th>
+                <th>Somme finale</th>
+                <th>Payée ?</th>
+                <th>Fichier</th>
                 <th>Actions</th>
             </tr>
             {% for f in factures %}
             <tr>
                 <td>{{ f[0] }}</td>
                 <td>{{ f[1] }}</td>
-                <td>{{ f[2] }}</td>
+                <td>{{ f[9] }}</td>
                 <td>{{ f[3] }}</td>
-                <td>{{ f[4] }}</td>
+                <td>{{ f[2] }}</td>
+                <td>{{ f[10] }}</td>
                 <td>{{ f[5] }}</td>
+                <td>{{ f[4] }}</td>
+                <td>{{ f[11] }}</td>
+                <td>{% if f[8] == 1 %}✅ Oui{% else %}❌ Non{% endif %}</td>
+                <td>
+                    {% if f[6] %}
+                        <a href="{{ url_for('telecharger_fichier', filename=f[6]) }}" target="_blank" title="Télécharger">
+                            📎
+                        </a>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
                 <td>
                     <form method="POST" action="/supprimer/{{ f[0] }}" onsubmit="return confirm('Confirmer la suppression ?');">
                         <button type="submit" class="danger">Supprimer</button>

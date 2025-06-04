@@ -3,7 +3,7 @@ import sqlite3
 def init_db():
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
-    
+
     # Table utilisateurs
     c.execute('''CREATE TABLE IF NOT EXISTS utilisateurs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -16,7 +16,7 @@ def init_db():
         mot_de_passe TEXT
     )''')
 
-    # Table factures avec utilisateur_id
+    # Table factures enrichie
     c.execute('''CREATE TABLE IF NOT EXISTS factures (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         fournisseur TEXT,
@@ -25,37 +25,46 @@ def init_db():
         montant_total TEXT,
         TVA TEXT,
         utilisateur_id INTEGER,
+        nom_fichier TEXT,
+        facture_payee INTEGER DEFAULT 0,
+        numero_client TEXT,
+        echeance TEXT,
+        somme_finale TEXT,
         FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
     )''')
 
     conn.commit()
     conn.close()
 
-def insert_facture(fournisseur, date_facture, numero_facture, montant_total, tva, utilisateur_id):
+
+def insert_facture(fournisseur, date_facture, numero_facture, montant_total, tva,
+                   utilisateur_id, nom_fichier, facture_payee, numero_client, echeance, somme_finale):
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
-    c.execute('''INSERT INTO factures (fournisseur, date_facture, numero_facture, montant_total, TVA, utilisateur_id)
-                 VALUES (?, ?, ?, ?, ?, ?)''',
-              (fournisseur, date_facture, numero_facture, montant_total, tva, utilisateur_id))
+    c.execute('''
+        INSERT INTO factures (
+            fournisseur, date_facture, numero_facture, montant_total, TVA, utilisateur_id,
+            nom_fichier, facture_payee, numero_client, echeance, somme_finale
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ''', (
+        fournisseur, date_facture, numero_facture, montant_total, tva, utilisateur_id,
+        nom_fichier, facture_payee, numero_client, echeance, somme_finale
+    ))
     conn.commit()
     conn.close()
+
 
 def ajouter_utilisateur(nom, prenom, age, secteur, email, pseudo, mot_de_passe):
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
-    
-    # Vérifie si l'email est déjà utilisé
     c.execute("SELECT * FROM utilisateurs WHERE email = ?", (email,))
     if c.fetchone():
         conn.close()
-        return False  # Signal d'erreur
-
-    # Insertion normale si email unique
+        return False
     c.execute('''
         INSERT INTO utilisateurs (nom, prenom, age, secteur, email, pseudo, mot_de_passe)
         VALUES (?, ?, ?, ?, ?, ?, ?)
     ''', (nom, prenom, age, secteur, email, pseudo, mot_de_passe))
-
     conn.commit()
     conn.close()
     return True

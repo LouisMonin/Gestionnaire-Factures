@@ -25,13 +25,14 @@ from datetime import datetime, date
 
 app = Flask(__name__)
 app.secret_key = 'ma_clé_secrète'
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 """ Initialisation de la base de données """
 
 @app.before_request
 def verifier_connexion():
+    """ Vérifie si l'utilisateur est connecté avant d'accéder à certaines routes """
     if request.endpoint in ['upload', 'afficher_factures', 'analyse'] and 'utilisateur_id' not in session:
         return redirect(url_for('login'))
 
@@ -122,6 +123,37 @@ def normaliser_date(date_str):
 def upload():
     """ Route pour télécharger et traiter les factures """
     if request.method == 'POST':
+        # Si soumission du formulaire après prévisualisation
+        if 'nom_entreprise' in request.form:
+            nom_fichier = request.form.get("nom_fichier")  # 🔧 utiliser la vraie valeur
+            nom_entreprise = request.form.get("nom_entreprise")
+            numero_client = request.form.get("numero_client")
+            numero_facture = request.form.get("numero_facture")
+            date_facture = request.form.get("date_facture")
+            echeance = request.form.get("echeance")
+            tva = request.form.get("tva")
+            total_ttc = request.form.get("total_ttc")
+            somme_finale = request.form.get("somme_finale")
+            facture_payee = 1 if request.form.get("facture_payee") == "on" else 0
+
+            insert_facture(
+                nom_entreprise,
+                date_facture,
+                numero_facture,
+                total_ttc,
+                tva,
+                session['utilisateur_id'],
+                nom_fichier,  # ✅ bon nom de fichier
+                facture_payee,
+                numero_client,
+                echeance,
+                somme_finale
+            )
+
+            flash("✅ Facture validée et enregistrée avec succès !", "success")
+            return redirect(url_for('accueil'))
+
+        # 📨 Traitement de l'upload initial
         if 'facture' not in request.files:
             flash("❌ Aucun fichier sélectionné.", "error")
             return redirect(url_for('upload'))
@@ -131,119 +163,16 @@ def upload():
             flash("❌ Fichier vide.", "error")
             return redirect(url_for('upload'))
 
-        extension = fichier.filename.split('.')[-1].lower()
-        chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], fichier.filename)
+        nom_fichier = fichier.filename
+        chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], nom_fichier)
         fichier.save(chemin_fichier)
 
-        try:
-            # ✅ Pour images PNG/JPG/JPEG
-            if extension in ['png', 'jpg', 'jpeg']:
-                texte = ocr_core(chemin_fichier)
-                donnees = extraire_infos(texte)
-                donnees["date_facture"] = normaliser_date(donnees["date_facture"])
-                insert_facture(
-                    donnees["fournisseur"],
-                    donnees["date_facture"],
-                    donnees["numero_facture"],
-                    donnees["montant_total"],
-                    donnees["TVA"],
-                    session['utilisateur_id']
-                )
-                flash("✅ Facture image enregistrée avec succès !", "success")
-
-            # ✅ Pour PDF
-            elif extension == 'pdf':
-                from pdf2image import convert_from_path
-                pages = convert_from_path(chemin_fichier, 300)
-                texte = ""
-                for page in pages:
-                    texte += pytesseract.image_to_string(page)
-                donnees = extraire_infos(texte)
-                donnees["date_facture"] = normaliser_date(donnees["date_facture"])
-                insert_facture(
-                    donnees["fournisseur"],
-                    donnees["date_facture"],
-                    donnees["numero_facture"],
-                    donnees["montant_total"],
-                    donnees["TVA"],
-                    session['utilisateur_id']
-                )
-                flash("✅ Facture PDF enregistrée avec succès !", "success")
-
-            # ✅ Pour Excel XLSX/XLS avec plusieurs lignes
-            elif extension in ['xlsx', 'xls']:
-                import pandas as pd
-                df = pd.read_excel(chemin_fichier)
-
-                if df.empty:
-                    flash("❌ Fichier Excel vide ou mal formaté.", "error")
-                    return redirect(url_for('upload'))
-
-                lignes_inserees = 0
-                for _, row in df.iterrows():
-                    date_norm = normaliser_date(str(row.get("Date", "Non trouvée")))
-                    donnees = {
-                        "fournisseur": str(row.get("Fournisseur", "Non trouvé")),
-                        "date_facture": date_norm,
-                        "numero_facture": str(row.get("Numéro de facture", "Non trouvé")),
-                        "montant_total": str(row.get("Montant TTC", "Non trouvé")),
-                        "TVA": str(row.get("TVA", "Non trouvée"))
-                    }
-
-                    insert_facture(
-                        donnees["fournisseur"],
-                        donnees["date_facture"],
-                        donnees["numero_facture"],
-                        donnees["montant_total"],
-                        donnees["TVA"],
-                        session['utilisateur_id']
-                    )
-                    lignes_inserees += 1
-
-                flash(f"✅ {lignes_inserees} facture(s) Excel enregistrée(s) avec succès !", "success")
-
-            elif extension == 'csv':
-                import pandas as pd
-                df = pd.read_csv(chemin_fichier, sep=None, engine='python')  # auto-détection du séparateur
-
-                if df.empty:
-                    flash("❌ Fichier CSV vide ou mal formaté.", "error")
-                    return redirect(url_for('upload'))
-
-                lignes_inserees = 0
-                for _, row in df.iterrows():
-                    date_norm = normaliser_date(str(row.get("Date", "Non trouvée")))
-                    donnees = {
-                        "fournisseur": str(row.get("Fournisseur", "Non trouvé")),
-                        "date_facture": date_norm,
-                        "numero_facture": str(row.get("Numéro de facture", "Non trouvé")),
-                        "montant_total": str(row.get("Montant TTC", "Non trouvé")),
-                        "TVA": str(row.get("TVA", "Non trouvée"))
-                    }
-
-                    insert_facture(
-                        donnees["fournisseur"],
-                        donnees["date_facture"],
-                        donnees["numero_facture"],
-                        donnees["montant_total"],
-                        donnees["TVA"],
-                        session['utilisateur_id']
-                    )
-                    lignes_inserees += 1
-
-                flash(f"✅ {lignes_inserees} facture(s) CSV enregistrée(s) avec succès !", "success")
-
-            else:
-                flash("❌ Format non supporté. Utilisez : PNG, JPG, PDF, Excel ou CSV.", "error")
-                return redirect(url_for('upload'))
-
-            return redirect(url_for('accueil'))
-
-        except Exception as e:
-            flash(f"❌ Erreur lors du traitement : {str(e)}", "error")
-            return redirect(url_for('upload'))
+        flash("✅ Fichier uploadé avec succès, veuillez valider les informations extraites.", "success")
+        return render_template('upload.html')
 
     return render_template('upload.html')
+
+
 
 @app.route('/factures')
 def afficher_factures():
@@ -460,6 +389,14 @@ def supprimer_tout():
     conn.commit()
     conn.close()
     return redirect('/factures')
+
+from flask import send_from_directory
+
+@app.route('/uploads/<path:filename>')
+def telecharger_fichier(filename):
+    """ Route pour télécharger un fichier spécifique depuis le dossier d'uploads """
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 @app.context_processor
 def injecter_pseudo():
