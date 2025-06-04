@@ -176,12 +176,23 @@ def upload():
 
 @app.route('/factures')
 def afficher_factures():
+
+
     """ Route pour afficher les factures de l'utilisateur """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
+
+    payee_filter = request.args.get('payee')  # '1' si cochée, None sinon
+    filter_active = request.args.get('filter_active', '0') == '1'  # '1' si le filtre est actif
+
+    # Appliquer le filtre uniquement si la case est cochée
+    if filter_active:
+        if payee_filter == '1':
+            factures = [f for f in factures if str(f[7]) in ['1', 'True', 'true']]
+
     return render_template('factures.html', factures=factures)
 
 #test pour checkbox factures payées

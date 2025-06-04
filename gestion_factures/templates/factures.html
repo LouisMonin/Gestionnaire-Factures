@@ -8,8 +8,22 @@
 <body>
     {% include 'header.html' %}
 
+
+
+
     <div class="container">
         <h1>Liste des factures</h1>
+
+        <!-- Filtres tableau -->
+<form method="GET" action="{{ url_for('afficher_factures') }}" class="filter-form" style="margin-bottom: 1em;">
+    <label for="payee">Afficher les factures impayées :</label>
+    <input type="checkbox" id="payee" name="payee" value="1" {% if request.args.get('payee') == '1' %}checked{% endif %}>
+
+    <input type="hidden" name="filter_active" value="1">
+    <button type="submit">Filtrer</button>
+    <a href="{{ url_for('afficher_factures') }}" style="margin-left: 1em;">Réinitialiser</a>
+</form>
+
         <table>
             <tr>
                 <th>ID</th>
