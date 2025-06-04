@@ -16,8 +16,8 @@
 
         <!-- Filtres tableau -->
 <form method="GET" action="{{ url_for('afficher_factures') }}" class="filter-form" style="margin-bottom: 1em;">
-    <label for="payee">Afficher les factures impayées :</label>
-    <input type="checkbox" id="payee" name="payee" value="1" {% if request.args.get('payee') == '1' %}checked{% endif %}>
+    <label for="facture_payee">Afficher les factures impayées :</label>
+    <input type="checkbox" id="facture_payee" name="facture_payee" value="1" {% if request.args.get('payee') == '1' %}checked{% endif %}>
 
     <input type="hidden" name="filter_active" value="1">
     <button type="submit">Filtrer</button>
@@ -52,7 +52,7 @@
                 <td>{{ f[11] }}</td>
                 <td>
                     <form action="{{ url_for('toggle_payee', facture_id=f[0]) }}" method="post">
-                        <input type="checkbox" name="payee" {% if f[7] %}checked{% endif %} onchange="this.form.submit()">
+                        <input type="checkbox" name="facture_payee" {% if f[7] %}checked{% endif %} onchange="this.form.submit()">
                     </form>
                   </td>
                 <td>

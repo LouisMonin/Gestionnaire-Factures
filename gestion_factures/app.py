@@ -185,7 +185,7 @@ def afficher_factures():
     factures = c.fetchall()
     conn.close()
 
-    payee_filter = request.args.get('payee')  # '1' si cochée, None sinon
+    payee_filter = request.args.get('facture_payee')  # '1' si cochée, None sinon
     filter_active = request.args.get('filter_active', '0') == '1'  # '1' si le filtre est actif
 
     # Appliquer le filtre uniquement si la case est cochée
@@ -204,7 +204,7 @@ def toggle_payee(facture_id):
 
     # On récupère l'état actuel
     c.execute(
-        'SELECT payee FROM factures WHERE id = ? AND utilisateur_id = ?',
+        'SELECT facture_payee FROM factures WHERE id = ? AND utilisateur_id = ?',
         (facture_id, session['utilisateur_id'])
     )
     resultat = c.fetchone()
@@ -216,7 +216,7 @@ def toggle_payee(facture_id):
         nouvel_etat = 0 if etat_actuel else 1
 
         c.execute(
-            'UPDATE factures SET payee = ? WHERE id = ? AND utilisateur_id = ?',
+            'UPDATE factures SET facture_payee = ? WHERE id = ? AND utilisateur_id = ?',
             (nouvel_etat, facture_id, session['utilisateur_id'])
         )
         conn.commit()

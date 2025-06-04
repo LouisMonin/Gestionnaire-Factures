@@ -26,7 +26,7 @@ def init_db():
         TVA TEXT,
         utilisateur_id INTEGER,
         nom_fichier TEXT,
-        facture_payee INTEGER DEFAULT 0,
+        facture_payee INTEGER,
         numero_client TEXT,
         echeance TEXT,
         somme_finale TEXT,
