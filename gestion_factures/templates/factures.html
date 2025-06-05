@@ -17,7 +17,7 @@
         <!-- Filtres tableau -->
 <form method="GET" action="{{ url_for('afficher_factures') }}" class="filter-form" style="margin-bottom: 1em;">
     <label for="facture_payee">Afficher les factures impayées :</label>
-    <input type="checkbox" id="checkbox_paiement" name="checkbox_paiement" value="1" {% if request.args.get('facture_payee') == '1' %}checked{% endif %}>
+    <input type="checkbox" id="checkbox_paiement" name="checkbox_paiement" value="1" {% if request.args.get('checkbox_paiement') == '1' %}checked{% endif %}>
 
     <input type="hidden" name="filter_active" value="1">
     <button type="submit">Filtrer</button>
@@ -41,23 +41,23 @@
             </tr>
             {% for f in factures %}
             <tr>
-                <td>{{ f[0] }}</td>
-                <td>{{ f[1] }}</td>
-                <td>{{ f[9] }}</td>
-                <td>{{ f[3] }}</td>
-                <td>{{ f[2] }}</td>
-                <td>{{ f[10] }}</td>
-                <td>{{ f[5] }}</td>
-                <td>{{ f[4] }}</td>
-                <td>{{ f[11] }}</td>
+                <td>{{ f['id'] }}</td>
+                <td>{{ f['fournisseur'] }}</td>
+                <td>{{ f['numero_client'] }}</td>
+                <td>{{ f['numero_facture'] }}</td>
+                <td>{{ f['date_facture'] }}</td>
+                <td>{{ f['echeance'] }}</td>
+                <td>{{ f['TVA'] }}</td>
+                <td>{{ f['montant_total'] }}</td>
+                <td>{{ f['somme_finale'] }}</td>
                 <td>
-                    <form action="{{ url_for('toggle_payee', facture_id=f[0]) }}" method="post">
-                        <input type="checkbox" name="checkbox_paiement" {% if f[7] %}checked{% endif %} onchange="this.form.submit()">
+                    <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
+                        <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
                     </form>
                   </td>
                 <td>
-                    {% if f[6] %}
-                        <a href="{{ url_for('telecharger_fichier', filename=f[6]) }}" target="_blank" title="Télécharger">
+                    {% if f['fichier'] %}
+                        <a href="{{ url_for('telecharger_fichier', filename=f['fichier']) }}" target="_blank" title="Télécharger">
                             📎
                         </a>
                     {% else %}
@@ -65,7 +65,7 @@
                     {% endif %}
                 </td>
                 <td>
-                    <form method="POST" action="/supprimer/{{ f[0] }}" onsubmit="return confirm('Confirmer la suppression ?');">
+                    <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
                         <button type="submit" class="danger">Supprimer</button>
                     </form>
                 </td>
@@ -74,7 +74,7 @@
         </table>
 
         <form method="POST" action="/supprimer_tout" onsubmit="return confirm('Supprimer toutes les factures ?');">
-            <button type="submit" class="danger full">🗑️ Supprimer toutes les factures</button>
+            <button type="submit" class="danger full">Supprimer toutes les factures</button>
         </form>
 
         <div style="text-align:center">

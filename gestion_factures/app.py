@@ -175,10 +175,9 @@ def upload():
 
 @app.route('/factures')
 def afficher_factures():
-
-
     """ Route pour afficher les factures de l'utilisateur """
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
@@ -190,63 +189,57 @@ def afficher_factures():
     # Appliquer le filtre uniquement si la case est cochée
     if filter_active:
         if payee_filter == '1':
-            factures = [f for f in factures if str(f[7]) in ['1', 'True', 'true']]
+            factures = [f for f in factures if str(f['facture_payee']) in ['0', 'False', 'false']]
 
     return render_template('factures.html', factures=factures)
 
-#test pour checkbox factures payées
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
 def toggle_payee(facture_id):
-    """ Route pour basculer l'état de paiement d'une facture """
+    """ Met à jour l'état 'payée' d'une facture selon la case cochée """
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
 
-    # On récupère l'état actuel
+    # L'état réel de la checkbox
+    nouvelle_valeur = 1 if 'checkbox_paiement' in request.form else 0
+
+    # Mise à jour dans la BDD
     c.execute(
-        'SELECT facture_payee FROM factures WHERE id = ? AND utilisateur_id = ?',
-        (facture_id, session['utilisateur_id'])
+        'UPDATE factures SET facture_payee = ? WHERE id = ? AND utilisateur_id = ?',
+        (nouvelle_valeur, facture_id, session['utilisateur_id'])
     )
-    resultat = c.fetchone()
-
-    if resultat is not None:
-        etat_actuel = resultat[0]
-        if etat_actuel is None:
-            etat_actuel = 0
-        nouvel_etat = 0 if etat_actuel else 1
-
-        c.execute(
-            'UPDATE factures SET facture_payee = ? WHERE id = ? AND utilisateur_id = ?',
-            (nouvel_etat, facture_id, session['utilisateur_id'])
-        )
-        conn.commit()
-
+    conn.commit()
     conn.close()
+
     return redirect(url_for('afficher_factures'))
+
 
 @app.route('/factures/json')
 def factures_json():
     """ Route pour obtenir les factures en format JSON """
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
     return jsonify([{
-        "id": f[0], "fournisseur": f[1], "date_facture": f[2], "numero_facture": f[3],
-        "montant_total": f[4], "TVA": f[5]
+        "id": f['id'], "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "numero_facture": f['numero_facture'],
+        "montant_total": f['montant_total'], "TVA": f['TVA']
     } for f in factures])
 
 @app.route('/factures/json/page')
 def json_visuel():
     """ Route pour afficher les factures en format JSON dans une page dédiée """
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
     return render_template("factures_json.html", factures=[{
-        "id": f[0], "fournisseur": f[1], "date_facture": f[2], "numero_facture": f[3],
-        "montant_total": f[4], "TVA": f[5]
+        "id": f['id'], "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "numero_facture": f['numero_facture'],
+        "montant_total": f['montant_total'], "TVA": f['TVA']
     } for f in factures])
 
 @app.route('/analyse', methods=['GET', 'POST'])
@@ -255,6 +248,7 @@ def analyse():
     if request.method == 'POST' and request.form.get('action') == 'reset':
         return redirect('/analyse')
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     fournisseur = request.form.get('fournisseur')
     date_debut = request.form.get('date_debut')
@@ -379,6 +373,7 @@ def analyse():
 def export_csv():
     """ Route pour exporter les factures filtrées en CSV """
     conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
     fournisseur = request.form.get('fournisseur')
     date_debut = request.form.get('date_debut')
@@ -469,5 +464,3 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True)
-
-
