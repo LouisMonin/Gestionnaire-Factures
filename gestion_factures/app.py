@@ -91,34 +91,6 @@ def logout():
     return redirect('/login')
 
 
-def normaliser_date(date_str):
-    """
-    Normalise une date en chaîne de caractères au format DD-MM-YYYY.
-    Accepte plusieurs formats d'entrée.
-    """
-    formats_possibles = [
-        "%d/%m/%Y",
-        "%d-%m-%Y",
-        "%Y-%m-%d",
-        "%Y/%m/%d",
-        "%d.%m.%Y",
-        "%Y.%m.%d",
-        "%d/%m/%Y %H:%M",
-        "%Y-%m-%d %H:%M",
-        "%Y/%m/%d %H:%M",
-        "%d-%m-%Y %H:%M:%S",
-        "%Y-%m-%d %H:%M:%S",
-        "%d.%m.%Y %H:%M:%S",
-    ]
-    for fmt in formats_possibles:
-        try:
-            dt = datetime.strptime(date_str.strip(), fmt)
-            return dt.strftime("%Y-%m-%d")
-        except (ValueError, AttributeError):
-            continue
-    return "Date invalide"  # ou None selon votre besoin
-
-
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
     """ Route pour télécharger et traiter les factures """
@@ -330,14 +302,67 @@ def analyse():
 
     repartition = c.fetchall()
 
-    # Paiements à venir (factures avec date > aujourd'hui)
+    # Toutes les factures impayées, triées par date d'échéance
+    now = datetime.now().strftime("%Y-%m-%d")
     c.execute('''
-        SELECT id, numero_facture, date_facture, fournisseur, montant_total, TVA
+        SELECT id, numero_facture, date_facture, echeance, fournisseur, montant_total, TVA
         FROM factures
-        WHERE utilisateur_id = ? AND date_facture > ?
-        ORDER BY date_facture ASC
-    ''', (session['utilisateur_id'], today.isoformat()))
+        WHERE utilisateur_id = ? AND facture_payee = 0
+        ORDER BY echeance ASC
+    ''', (session['utilisateur_id'],))
     paiements_avenir = c.fetchall()
+
+
+    # Cumul à l’échéance selon paiement -----------------------------------
+    c.execute('''
+    SELECT echeance, REPLACE(montant_total, ",", "."), facture_payee
+    FROM factures
+    WHERE utilisateur_id = ?
+''', (session['utilisateur_id'],))
+    factures_brutes = c.fetchall()
+
+    factures_payees = []
+    factures_impayees = []
+
+    for echeance, montant_str, payee in factures_brutes:
+        try:
+            montant = float(str(montant_str).replace('€', '').replace(',', '.').strip())
+            if payee == 1:
+                factures_payees.append((echeance, montant))
+            else:
+                factures_impayees.append((echeance, montant))
+        except Exception as e:
+            print(f"Erreur montant: {montant_str} → {e}")
+            continue
+
+    # Trier chaque groupe par date
+    factures_payees.sort(key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
+    factures_impayees.sort(key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
+
+    # Dates et cumul pour les payées
+    dates_payees = []
+    cumul_payees = []
+    total_payees = 0
+    for date_str, montant in factures_payees:
+        total_payees += montant
+        dates_payees.append(date_str)
+        cumul_payees.append(total_payees)
+
+    # Courbe prévisionnelle : commence à la dernière date payée avec valeur cumulée actuelle
+    dates_impayees = []
+    cumul_impayees = []
+
+    if dates_payees:
+        last_paid_date = dates_payees[-1]
+        cumul_impayees.append(total_payees)
+        dates_impayees.append(last_paid_date)
+
+    for date_str, montant in factures_impayees:
+        total_payees += montant
+        dates_impayees.append(date_str)
+        cumul_impayees.append(total_payees)
+
+    # Fin ajout cumul échéance -----------------------------------
 
     conn.close()
 
@@ -369,7 +394,13 @@ def analyse():
         nb_annee=nb_annee,
         total_mois=total_mois,
         nb_mois=nb_mois,
-        paiements_avenir=paiements_avenir
+        today=today,
+        paiements_avenir=paiements_avenir,
+        dates_payees=dates_payees,
+        cumul_payees=cumul_payees,
+        dates_impayees=dates_impayees,
+        cumul_impayees=cumul_impayees,
+        now=now,
     )
 
 @app.route('/export_csv', methods=['POST'])
