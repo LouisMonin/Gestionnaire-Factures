@@ -302,15 +302,34 @@ def analyse():
 
     repartition = c.fetchall()
 
-    # Toutes les factures impayées, triées par date d'échéance
-    now = datetime.now().strftime("%Y-%m-%d")
+    # Toutes les factures impayées, triées par date d'échéance -----------------
+    now = date.today().isoformat()
+
+    # Factures impayées en retard (date échéance < today)
     c.execute('''
         SELECT id, numero_facture, date_facture, echeance, fournisseur, montant_total, TVA
         FROM factures
-        WHERE utilisateur_id = ? AND facture_payee = 0
+        WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance < ?
         ORDER BY echeance ASC
-    ''', (session['utilisateur_id'],))
-    paiements_avenir = c.fetchall()
+    ''', (session['utilisateur_id'], today))
+    factures_en_retard = c.fetchall()
+
+    # Factures impayées à venir (date échéance >= today)
+    c.execute('''
+        SELECT id, numero_facture, date_facture, echeance, fournisseur, montant_total, TVA
+        FROM factures
+        WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance >= ?
+        ORDER BY echeance ASC
+    ''', (session['utilisateur_id'], now))
+    factures_a_venir = c.fetchall()
+
+    # Concaténation des listes pour afficher dans le même tableau, triées par date d'échéance
+    paiements_avenir = factures_en_retard + factures_a_venir
+
+    # Conversion des dates en string ISO (par sécurité)
+    for f in paiements_avenir:
+        if not isinstance(f['echeance'], str):
+            f['echeance'] = f['echeance'].isoformat() if hasattr(f['echeance'], 'isoformat') else str(f['echeance'])
 
 
     # Cumul à l’échéance selon paiement -----------------------------------
@@ -396,11 +415,13 @@ def analyse():
         nb_mois=nb_mois,
         today=today,
         paiements_avenir=paiements_avenir,
+        factures_en_retard=factures_en_retard,
+        factures_a_venir=factures_a_venir,
+        now=now,
         dates_payees=dates_payees,
         cumul_payees=cumul_payees,
         dates_impayees=dates_impayees,
         cumul_impayees=cumul_impayees,
-        now=now,
     )
 
 @app.route('/export_csv', methods=['POST'])
