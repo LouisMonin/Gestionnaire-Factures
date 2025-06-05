@@ -164,6 +164,9 @@ def upload():
 
         nom_fichier = fichier.filename
         chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], nom_fichier)
+        print(">>> Nom du fichier reçu :", fichier.filename)
+        print(">>> Sauvegarde dans :", chemin_fichier)
+
         fichier.save(chemin_fichier)
 
         flash("✅ Fichier uploadé avec succès, veuillez valider les informations extraites.", "success")

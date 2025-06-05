@@ -28,13 +28,11 @@
             <tr>
                 <th>ID</th>
                 <th>Nom entreprise</th>
-                <th>Numéro client</th>
                 <th>Numéro facture</th>
                 <th>Date facture</th>
                 <th>Échéance</th>
                 <th>TVA</th>
                 <th>Total TTC</th>
-                <th>Somme finale</th>
                 <th>Payée</th>
                 <th>Fichier</th>
                 <th>Actions</th>
@@ -43,27 +41,26 @@
             <tr>
                 <td>{{ f['id'] }}</td>
                 <td>{{ f['fournisseur'] }}</td>
-                <td>{{ f['numero_client'] }}</td>
                 <td>{{ f['numero_facture'] }}</td>
                 <td>{{ f['date_facture'] }}</td>
                 <td>{{ f['echeance'] }}</td>
                 <td>{{ f['TVA'] }}</td>
                 <td>{{ f['montant_total'] }}</td>
-                <td>{{ f['somme_finale'] }}</td>
                 <td>
                     <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
                         <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
                     </form>
                   </td>
                 <td>
-                    {% if f['fichier'] %}
-                        <a href="{{ url_for('telecharger_fichier', filename=f['fichier']) }}" target="_blank" title="Télécharger">
-                            📎
-                        </a>
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
+  {% if f['nom_fichier'] %}
+    <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger">
+        📎
+    </a>
+  {% else %}
+    -
+  {% endif %}
+</td>
+
                 <td>
                     <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
                         <button type="submit" class="danger">Supprimer</button>

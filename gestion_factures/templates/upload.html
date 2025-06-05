@@ -13,30 +13,33 @@
     <h1>Importer une facture</h1>
 
     <div class="flex-container" style="display: flex; gap: 60px; justify-content: space-between;">
-      <div id="preview" class="upload-preview" style="flex:1;"></div>
+      <div id="preview" class="upload-preview" style="flex:1; display: none;"></div>
 
       <form id="facture-formulaire" class="facture-form" method="POST" style="display:none; flex:1;">
         <h3>📝 Informations extraites</h3>
         <label>Nom entreprise : <input type="text" name="nom_entreprise" id="nom_entreprise"></label>
-        <label>Numéro de client : <input type="text" name="numero_client" id="numero_client"></label>
         <label>Numéro de facture : <input type="text" name="numero_facture" id="numero_facture"></label>
         <label>Date de facture : <input type="date" name="date_facture" id="date_facture"></label>
         <label>Échéance : <input type="date" name="echeance" id="echeance"></label>
         <label>TVA (%) : <input type="text" name="tva" id="tva"></label>
         <label>Total TTC : <input type="text" name="total_ttc" id="total_ttc"></label>
-        <label>Somme finale à payer : <input type="text" name="somme_finale" id="somme_finale"></label>
-        
+
         <input type="hidden" name="nom_fichier" id="nom_fichier">
         <button type="submit">✅ Valider la facture</button>
       </form>
     </div>
 
-    <form class="upload-form">
-      <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
-    </form>
+    <div class="bloc-importation">
+  <form class="upload-form" enctype="multipart/form-data">
+    <label for="facture" class="upload-label">📁 Sélectionnez un fichier de facture</label>
+    <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
+  </form>
+  <p class="upload-hint">Formats acceptés : Excel, CSV</p>
+</div>
+
 
     <div style="text-align:center">
-      <a class="button return-home" href="/">⬅ Retour à l'accueil</a>
+      <a class="button return-home" href="/">Retour à l'accueil</a>
     </div>
   </div>
 
@@ -68,6 +71,8 @@ document.getElementById('facture').addEventListener('change', function () {
     });
     table += '</table>';
     preview.innerHTML = table;
+    preview.style.display = 'block';
+
 
     const normalize = str => (str || '').toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, '').toLowerCase();
     const cleanValue = val => (val || '').replace(/[^\d.,]/g, '').replace(',', '.').trim();
@@ -123,13 +128,11 @@ document.getElementById('facture').addEventListener('change', function () {
     };
 
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
-    document.getElementById("numero_client").value = findValue(["numero de client", "client"]);
     document.getElementById("numero_facture").value = findValue(["numero de facture", "facture"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
     document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc"]));
-    document.getElementById("somme_finale").value = cleanValue(findValue(["somme finale", "total a payer", "sommefinaleapayer"]));
     document.getElementById("nom_fichier").value = file.name;
 
     // Fallback DOM robuste
@@ -156,7 +159,6 @@ document.getElementById('facture').addEventListener('change', function () {
 
     fallbackFromDOM("taux de tva", "tva");
     fallbackFromDOM("total ttc", "total_ttc");
-    fallbackFromDOM("somme finale", "somme_finale");
 
     form.style.display = 'block';
   };
