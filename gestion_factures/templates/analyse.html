@@ -32,8 +32,71 @@
                 <h3>Nombre de factures ce mois-ci</h3>
                 <p>{{ nb_mois }}</p>
             </div>
+            <div class="kpi cursor-pointer" onclick="toggleImpayees()" id="kpiImpayees">
+                <h3>Nombre de factures impayées</h3>
+                <p>
+                    {{ factures_en_retard | length + factures_a_venir | length }}
+                    {% if factures_en_retard | length > 0 %}
+                        <br>
+                        <span class="rouge"> dont {{ factures_en_retard | length }} en retard</span>
+                    {% endif %}
+                </p>
+            </div>
         </div>
 
+
+        <div id="impayeesSection" style="display: none;">
+            <div class="table-wrapper">
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">Factures impayées (toutes échéances)</h2>
+                <div class="mb-2 flex items-center space-x-2">
+                    <span style="display:inline-block; width:25px; height:16px; background-color:#f8d7da; border:1px solid #721c24; border-radius:4px;">&nbsp;</span>
+                    <span class="text-sm text-gray-700"> Factures en retard</span>
+                </div>
+                {% if paiements_avenir %}
+                    <div class="overflow-auto rounded-lg shadow-md">
+                        <table class="min-w-full text-sm text-left text-gray-700 bg-white border border-gray-200">
+                            <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
+                                <tr>
+                                    <th class="px-4 py-2">Fournisseur</th>
+                                    <th class="px-4 py-2">Date facture</th>
+                                    <th class="px-4 py-2">Échéance</th>  <!-- Nouvelle colonne -->
+                                    <th class="px-4 py-2">Numéro</th>
+                                    <th class="px-4 py-2">Montant</th>
+                                    <th class="px-4 py-2">TVA</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {# Factures en retard, affichées en rouge #}
+                            {% for facture in factures_en_retard %}
+                                <tr class="retard">
+                                <td class="px-4 py-2">{{ facture['fournisseur'] }}</td>
+                                <td class="px-4 py-2">{{ facture['date_facture'] }}</td>
+                                <td class="px-4 py-2">{{ facture['echeance'] }}</td>
+                                <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>
+                                <td class="px-4 py-2">{{ facture['montant_total'] }} €</td>
+                                <td class="px-4 py-2">{{ facture['TVA'] }} %</td>
+                                </tr>
+                            {% endfor %}
+
+                            {# Factures à venir, affichées normalement #}
+                            {% for facture in factures_a_venir %}
+                                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                                <td class="px-4 py-2">{{ facture['fournisseur'] }}</td>
+                                <td class="px-4 py-2">{{ facture['date_facture'] }}</td>
+                                <td class="px-4 py-2">{{ facture['echeance'] }}</td>
+                                <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>
+                                <td class="px-4 py-2">{{ facture['montant_total'] }} €</td>
+                                <td class="px-4 py-2">{{ facture['TVA'] }} %</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-gray-500 italic">Aucune facture à venir.</p>
+                {% endif %}
+            </div>
+        </div>
 
         <form method="POST" class="form-filtres">
             <label for="date_debut">Date début :</label>
@@ -77,41 +140,6 @@
 
 
         <div class="chart-wrapper">
-            <h2 class="text-xl font-semibold text-gray-700 mb-2">Factures impayées (toutes échéances)</h2>
-            {% if paiements_avenir %}
-                <div class="overflow-auto rounded-lg shadow-md">
-                    <table class="min-w-full text-sm text-left text-gray-700 bg-white border border-gray-200">
-                        <thead class="bg-gray-100 text-gray-600 uppercase text-xs">
-                            <tr>
-                                <th class="px-4 py-2">Fournisseur</th>
-                                <th class="px-4 py-2">Date facture</th>
-                                <th class="px-4 py-2">Échéance</th>  <!-- Nouvelle colonne -->
-                                <th class="px-4 py-2">Numéro</th>
-                                <th class="px-4 py-2">Montant</th>
-                                <th class="px-4 py-2">TVA</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for facture in paiements_avenir %}
-                            <tr class="border-t border-gray-200 hover:bg-gray-50 {% if facture['echeance'] < now %}bg-red-100{% endif %}">
-                                <td class="px-4 py-2">{{ facture['fournisseur'] }}</td>  <!-- fournisseur -->
-                                <td class="px-4 py-2">{{ facture['date_facture'] }}</td>  <!-- date_facture -->
-                                <td class="px-4 py-2">{{ facture['echeance'] }}</td>  <!-- echeance -->
-                                <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>  <!-- numero_facture -->
-                                <td class="px-4 py-2">{{ facture['montant_total'] }} €</td> <!-- montant_total -->
-                                <td class="px-4 py-2">{{ facture['TVA'] }}</td>  <!-- TVA -->
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <p class="text-gray-500 italic">Aucune facture à venir.</p>
-            {% endif %}
-        </div>
-
-
-        <div class="chart-wrapper">
             <canvas id="evolutionChart"></canvas>
         </div>
 
@@ -136,23 +164,23 @@
         new Chart(evolutionCtx, {
             type: 'line',
             data: {
-                labels: [...new Set([...{{ dates_payees | tojson | safe }}, ...{{ dates_impayees | tojson | safe }}])],
+                labels: {{ labels | tojson | safe }},
                 datasets: [
                     {
-                        label: 'Cumul payé à échéance',
+                        label: 'Cumul des factures payées',
                         data: {{ cumul_payees | tojson | safe }},
                         borderColor: 'rgba(0,123,255,1)',
-                        backgroundColor: 'rgba(0,123,255,0.2)',  // ombrage bleu
+                        backgroundColor: 'rgba(0,123,255,0.2)',
                         borderWidth: 2,
                         pointRadius: 3,
                         tension: 0.3,
                         fill: true
                     },
                     {
-                        label: 'Prévisionnel impayé',
-                        data: Array({{ cumul_payees | length }} - 1).fill(null).concat({{ cumul_impayees | tojson | safe }}),
+                        label: 'Prévisionnel avec les factures impayées',
+                        data: {{ cumul_impayees | tojson | safe }},
                         borderColor: 'rgba(255,165,0,1)',
-                        backgroundColor: 'rgba(255,165,0,0.2)',  // ombrage orange
+                        backgroundColor: 'rgba(255,165,0,0.2)',
                         borderDash: [5, 5],
                         borderWidth: 2,
                         pointRadius: 3,
@@ -183,7 +211,7 @@
                                 const dateStr = this.getLabelForValue(value);
                                 const parts = dateStr.split('-');
                                 if (parts.length === 3) {
-                                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                    return `${parts[2]}/${parts[1]}/${parts[0]}`;  // format JJ/MM/AAAA
                                 }
                                 return dateStr;
                             }
@@ -246,5 +274,13 @@
             a2.click();
         }
     </script>
+
+    <script>
+        function toggleImpayees() {
+            const section = document.getElementById('impayeesSection');
+            section.style.display = (section.style.display === 'none' || section.style.display === '') ? 'block' : 'none';
+        }
+    </script>
+
 </body>
 </html>
