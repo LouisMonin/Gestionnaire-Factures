@@ -74,7 +74,7 @@
                                 <td class="px-4 py-2">{{ facture['echeance'] }}</td>
                                 <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>
                                 <td class="px-4 py-2">{{ facture['montant_total'] }} €</td>
-                                <td class="px-4 py-2">{{ facture['TVA'] }}</td>
+                                <td class="px-4 py-2">{{ facture['TVA'] }} %</td>
                                 </tr>
                             {% endfor %}
 
@@ -86,7 +86,7 @@
                                 <td class="px-4 py-2">{{ facture['echeance'] }}</td>
                                 <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>
                                 <td class="px-4 py-2">{{ facture['montant_total'] }} €</td>
-                                <td class="px-4 py-2">{{ facture['TVA'] }}</td>
+                                <td class="px-4 py-2">{{ facture['TVA'] }} %</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -164,23 +164,23 @@
         new Chart(evolutionCtx, {
             type: 'line',
             data: {
-                labels: [...new Set([...{{ dates_payees | tojson | safe }}, ...{{ dates_impayees | tojson | safe }}])],
+                labels: {{ labels | tojson | safe }},
                 datasets: [
                     {
-                        label: 'Cumul payé à échéance',
+                        label: 'Cumul des factures payées',
                         data: {{ cumul_payees | tojson | safe }},
                         borderColor: 'rgba(0,123,255,1)',
-                        backgroundColor: 'rgba(0,123,255,0.2)',  // ombrage bleu
+                        backgroundColor: 'rgba(0,123,255,0.2)',
                         borderWidth: 2,
                         pointRadius: 3,
                         tension: 0.3,
                         fill: true
                     },
                     {
-                        label: 'Prévisionnel impayé',
-                        data: Array({{ cumul_payees | length }} - 1).fill(null).concat({{ cumul_impayees | tojson | safe }}),
+                        label: 'Prévisionnel avec les factures impayées',
+                        data: {{ cumul_impayees | tojson | safe }},
                         borderColor: 'rgba(255,165,0,1)',
-                        backgroundColor: 'rgba(255,165,0,0.2)',  // ombrage orange
+                        backgroundColor: 'rgba(255,165,0,0.2)',
                         borderDash: [5, 5],
                         borderWidth: 2,
                         pointRadius: 3,
@@ -211,7 +211,7 @@
                                 const dateStr = this.getLabelForValue(value);
                                 const parts = dateStr.split('-');
                                 if (parts.length === 3) {
-                                    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+                                    return `${parts[2]}/${parts[1]}/${parts[0]}`;  // format JJ/MM/AAAA
                                 }
                                 return dateStr;
                             }

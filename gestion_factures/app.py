@@ -20,6 +20,7 @@ import io
 from pdf2image import convert_from_path
 import pandas as pd
 from datetime import datetime, date
+from collections import defaultdict
 
 """ Configuration de l'application Flask """
 
@@ -333,11 +334,12 @@ def analyse():
 
 
     # Cumul à l’échéance selon paiement -----------------------------------
+
     c.execute('''
-    SELECT echeance, REPLACE(montant_total, ",", "."), facture_payee
-    FROM factures
-    WHERE utilisateur_id = ?
-''', (session['utilisateur_id'],))
+        SELECT echeance, REPLACE(montant_total, ",", "."), facture_payee
+        FROM factures
+        WHERE utilisateur_id = ?
+    ''', (session['utilisateur_id'],))
     factures_brutes = c.fetchall()
 
     factures_payees = []
@@ -354,32 +356,35 @@ def analyse():
             print(f"Erreur montant: {montant_str} → {e}")
             continue
 
-    # Trier chaque groupe par date
-    factures_payees.sort(key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
-    factures_impayees.sort(key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
+    # --- Construction d'une timeline unique triée ---
+    all_dates = set([f[0] for f in factures_payees + factures_impayees])
+    all_dates = sorted(all_dates, key=lambda d: datetime.strptime(d, "%Y-%m-%d"))
 
-    # Dates et cumul pour les payées
-    dates_payees = []
-    cumul_payees = []
-    total_payees = 0
+    # Dictionnaires pour regrouper les montants par date
+    cumul_payees_dict = defaultdict(float)
+    cumul_impayees_dict = defaultdict(float)
+
     for date_str, montant in factures_payees:
-        total_payees += montant
-        dates_payees.append(date_str)
-        cumul_payees.append(total_payees)
-
-    # Courbe prévisionnelle : commence à la dernière date payée avec valeur cumulée actuelle
-    dates_impayees = []
-    cumul_impayees = []
-
-    if dates_payees:
-        last_paid_date = dates_payees[-1]
-        cumul_impayees.append(total_payees)
-        dates_impayees.append(last_paid_date)
+        cumul_payees_dict[date_str] += montant
 
     for date_str, montant in factures_impayees:
-        total_payees += montant
-        dates_impayees.append(date_str)
-        cumul_impayees.append(total_payees)
+        cumul_impayees_dict[date_str] += montant
+
+    # Courbes cumulées sur une même ligne de temps
+    labels = []
+    cumul_payees = []
+    cumul_impayees = []
+
+    total_payees = 0
+    total_impayees = 0
+
+    for date_str in all_dates:
+        labels.append(date_str)
+        total_payees += cumul_payees_dict[date_str]
+        total_impayees += cumul_impayees_dict[date_str]
+        cumul_payees.append(round(total_payees, 2))
+        cumul_impayees.append(round(total_payees + total_impayees, 2))  # global avec impayés
+
 
     # Fin ajout cumul échéance -----------------------------------
 
@@ -418,9 +423,8 @@ def analyse():
         factures_en_retard=factures_en_retard,
         factures_a_venir=factures_a_venir,
         now=now,
-        dates_payees=dates_payees,
+        labels=labels,
         cumul_payees=cumul_payees,
-        dates_impayees=dates_impayees,
         cumul_impayees=cumul_impayees,
     )
 
