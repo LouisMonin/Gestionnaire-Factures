@@ -157,6 +157,9 @@ def afficher_factures():
     factures = c.fetchall()
     conn.close()
 
+    # Catégories de factures
+    categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
+    
     payee_filter = request.args.get('checkbox_paiement')  # '1' si cochée, None sinon
     filter_active = request.args.get('filter_active', '0') == '1'  # '1' si le filtre est actif
 
@@ -165,7 +168,7 @@ def afficher_factures():
         if payee_filter == '1':
             factures = [f for f in factures if str(f['facture_payee']) in ['0', 'False', 'false']]
 
-    return render_template('factures.html', factures=factures)
+    return render_template('factures.html', factures=factures, categories=categories)
 
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
 def toggle_payee(facture_id):
@@ -187,6 +190,17 @@ def toggle_payee(facture_id):
 
     return redirect(url_for('afficher_factures'))
 
+@app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
+def modifier_categorie(facture_id):
+    nouvelle_categorie = request.form.get('categorie')
+    conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', (nouvelle_categorie, facture_id, session['utilisateur_id']))
+    
+    conn.commit()
+    conn.close()
+    return redirect(url_for('afficher_factures'))
 
 @app.route('/factures/json')
 def factures_json():

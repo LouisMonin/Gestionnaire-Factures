@@ -1023,3 +1023,47 @@ form.upload-form {
 .cursor-pointer {
     cursor: pointer;
 }
+/* Style général */
+.categorie-cell select {
+    color: rgb(0, 0, 0);
+    text-align: center;
+    border: solid;
+    font-weight: bold;
+    padding: 4px 6px;
+    border-radius: 6px;
+  }
+  
+  /* Couleurs par catégorie */
+  .categorie-cell.electricite select {
+    color: rgb(255, 255, 255);
+    background-color: #ffd66ee6;
+  }
+  
+  .categorie-cell.internet select {
+    color: rgb(255, 255, 255);
+    background-color: #006d77;
+  }
+  
+  .categorie-cell.eau select {
+    color: rgb(255, 255, 255);
+    background-color: #118ab2;
+  }
+  
+  .categorie-cell.telephone select {
+    color: rgb(255, 255, 255);
+    background-color: #adb5bd;
+  }
+  
+  .categorie-cell.assurance select {
+    color: rgb(255, 255, 255);
+    background-color: chocolate;
+  }
+  
+  .categorie-cell.autre select {
+    color: rgb(255, 255, 255);
+    background-color: rgb(255, 131, 210);
+  }
+  
+  .categorie-cell.non_categorisee select {
+    color: rgb(0, 0, 0);
+  }

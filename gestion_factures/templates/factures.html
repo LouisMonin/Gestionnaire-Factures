@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Factures enregistrées</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
 </head>
 <body>
     {% include 'header.html' %}
@@ -35,6 +36,7 @@
                 <th>Total TTC</th>
                 <th>Payée</th>
                 <th>Fichier</th>
+                <th>Catégorisation</th>
                 <th>Actions</th>
             </tr>
             {% for f in factures %}
@@ -61,11 +63,21 @@
   {% endif %}
 </td>
 
+<td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
+    <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
+      <select name="categorie" onchange="this.form.submit()">
+        {% for cat in categories %}
+          <option value="{{ cat }}" {% if f['categorie'] == cat %}selected{% endif %}>{{ cat }}</option>
+        {% endfor %}
+      </select>
+    </form>
+  </td>
                 <td>
                     <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
                         <button type="submit" class="danger">Supprimer</button>
                     </form>
                 </td>
+                
             </tr>
             {% endfor %}
         </table>
