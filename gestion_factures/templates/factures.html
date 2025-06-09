@@ -37,11 +37,19 @@
                 <th>Payée</th>
                 <th>Catégorisation</th>
                 <th>Supprimer</th>
-                <th>Fichier</th>
             </tr>
             {% for f in factures %}
             <tr>
-                <td>{{ f['id'] }}</td>
+                <td>
+                    {% if f['nom_fichier'] %}
+                      <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger la facture {{ f['id'] }}">
+                        {{ f['id'] }}
+                      </a>
+                    {% else %}
+                      {{ f['id'] }}
+                    {% endif %}
+                  </td>
+
                 <td>{{ f['fournisseur'] }}</td>
                 <td>{{ f['numero_facture'] }}</td>
                 <td>{{ f['date_facture'] }}</td>
@@ -68,16 +76,6 @@
                         <button type="submit" class="danger">X</button>
                     </form>
                 </td>
-
-                <td>
-                    {% if f['nom_fichier'] %}
-                      <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger">
-                          📎
-                      </a>
-                    {% else %}
-                      -
-                    {% endif %}
-                  </td>
                 
             </tr>
             {% endfor %}
