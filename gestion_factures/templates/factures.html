@@ -54,8 +54,8 @@
                 <td>{{ f['numero_facture'] }}</td>
                 <td>{{ f['date_facture'] }}</td>
                 <td>{{ f['echeance'] }}</td>
-                <td>{{ f['TVA'] }}</td>
-                <td>{{ f['montant_total'] }}</td>
+                <td>{{ f['TVA'] }} %</td>
+                <td>{{ f['montant_total'] }} €</td>
                 <td>
                     <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
                         <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
