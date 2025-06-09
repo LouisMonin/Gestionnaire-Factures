@@ -94,58 +94,56 @@ def logout():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
-    """ Route pour télécharger et traiter les factures """
     if request.method == 'POST':
-        # Si soumission du formulaire après prévisualisation
-        if 'nom_entreprise' in request.form:
-            nom_fichier = request.form.get("nom_fichier")  # 🔧 utiliser la vraie valeur
-            nom_entreprise = request.form.get("nom_entreprise")
-            numero_client = request.form.get("numero_client")
-            numero_facture = request.form.get("numero_facture")
-            date_facture = request.form.get("date_facture")
-            echeance = request.form.get("echeance")
-            tva = request.form.get("tva")
-            total_ttc = request.form.get("total_ttc")
-            somme_finale = request.form.get("somme_finale")
-            facture_payee =  0 # Par défaut, on considère que la facture n'est pas payée
-            insert_facture(
-                nom_entreprise,
-                date_facture,
-                numero_facture,
-                total_ttc,
-                tva,
-                session['utilisateur_id'],
-                nom_fichier,  # ✅ bon nom de fichier
-                facture_payee,
-                numero_client,
-                echeance,
-                somme_finale
-            )
+        fichier = request.files.get('facture')
+        if fichier and fichier.filename:
+            nom_fichier = fichier.filename
+            chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], nom_fichier)
 
-            flash("✅ Facture validée et enregistrée avec succès !", "success")
-            return redirect(url_for('accueil'))
+            # Crée le dossier s’il n’existe pas
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-        # 📨 Traitement de l'upload initial
-        if 'facture' not in request.files:
+            try:
+                fichier.save(chemin_fichier)
+                print("✅ Fichier sauvegardé :", chemin_fichier)
+            except Exception as e:
+                print("❌ Erreur lors de la sauvegarde :", e)
+                flash("❌ Erreur lors de la sauvegarde du fichier.", "error")
+                return redirect(url_for('upload'))
+        else:
             flash("❌ Aucun fichier sélectionné.", "error")
             return redirect(url_for('upload'))
 
-        fichier = request.files['facture']
-        if fichier.filename == '':
-            flash("❌ Fichier vide.", "error")
-            return redirect(url_for('upload'))
+        # Puis traite les champs extraits du formulaire
+        nom_entreprise = request.form.get("nom_entreprise")
+        numero_client = request.form.get("numero_client")
+        numero_facture = request.form.get("numero_facture")
+        date_facture = request.form.get("date_facture")
+        echeance = request.form.get("echeance")
+        tva = request.form.get("tva")
+        total_ttc = request.form.get("total_ttc")
+        somme_finale = request.form.get("somme_finale")
+        facture_payee = 0
 
-        nom_fichier = fichier.filename
-        chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], nom_fichier)
-        print(">>> Nom du fichier reçu :", fichier.filename)
-        print(">>> Sauvegarde dans :", chemin_fichier)
+        insert_facture(
+            nom_entreprise,
+            date_facture,
+            numero_facture,
+            total_ttc,
+            tva,
+            session['utilisateur_id'],
+            nom_fichier,
+            facture_payee,
+            numero_client,
+            echeance,
+            somme_finale
+        )
 
-        fichier.save(chemin_fichier)
-
-        flash("✅ Fichier uploadé avec succès, veuillez valider les informations extraites.", "success")
-        return render_template('upload.html')
+        flash("✅ Facture enregistrée avec succès.", "success")
+        return redirect(url_for('accueil'))
 
     return render_template('upload.html')
+
 
 
 
@@ -516,10 +514,17 @@ def extraire_infos(texte):
     }
 
 if __name__ == "__main__":
-    """ Point d'entrée de l'application Flask """
     import webbrowser
-    if not os.path.exists(UPLOAD_FOLDER):
-        os.makedirs(UPLOAD_FOLDER)
+    # 🛠️ Création sécurisée du dossier uploads si manquant
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        try:
+            os.makedirs(app.config['UPLOAD_FOLDER'])
+            print(f"📂 Dossier uploads créé dans : {app.config['UPLOAD_FOLDER']}")
+        except Exception as e:
+            print(f"❌ Impossible de créer le dossier uploads : {e}")
+    else:
+        print(f"📁 Dossier uploads déjà présent : {app.config['UPLOAD_FOLDER']}")
+
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

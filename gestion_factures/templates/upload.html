@@ -15,28 +15,43 @@
     <div class="flex-container" style="display: flex; gap: 60px; justify-content: space-between;">
       <div id="preview" class="upload-preview" style="flex:1; display: none;"></div>
 
-      <form id="facture-formulaire" class="facture-form" method="POST" style="display:none; flex:1;">
+      <!-- ✅ FORMULAIRE avec CHAMP FICHIER INTÉGRÉ -->
+      <form id="facture-formulaire" class="facture-form" method="POST" enctype="multipart/form-data" style="flex:1;">
         <h3>📝 Informations extraites</h3>
-        <label>Nom entreprise : <input type="text" name="nom_entreprise" id="nom_entreprise"></label>
-        <label>Numéro de facture : <input type="text" name="numero_facture" id="numero_facture"></label>
-        <label>Date de facture : <input type="date" name="date_facture" id="date_facture"></label>
-        <label>Échéance : <input type="date" name="echeance" id="echeance"></label>
-        <label>TVA (%) : <input type="text" name="tva" id="tva"></label>
-        <label>Total TTC : <input type="text" name="total_ttc" id="total_ttc"></label>
+
+        <label for="facture" class="upload-label">📁 Sélectionnez un fichier de facture</label>
+        <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
+        <p class="upload-hint">Formats acceptés : Excel, CSV</p>
 
         <input type="hidden" name="nom_fichier" id="nom_fichier">
+
+        <label>Nom entreprise :
+          <input type="text" name="nom_entreprise" id="nom_entreprise">
+        </label>
+
+        <label>Numéro de facture :
+          <input type="text" name="numero_facture" id="numero_facture" inputmode="numeric" pattern="[0-9]*">
+        </label>
+
+        <label>Date de facture :
+          <input type="date" name="date_facture" id="date_facture">
+        </label>
+
+        <label>Échéance :
+          <input type="date" name="echeance" id="echeance">
+        </label>
+
+        <label>TVA (%) :
+          <input type="text" name="tva" id="tva" inputmode="decimal" pattern="^\d*\.?\d*$">
+        </label>
+
+        <label>Total TTC :
+          <input type="text" name="total_ttc" id="total_ttc" inputmode="decimal" pattern="^\d*\.?\d*$">
+        </label>
+
         <button type="submit">✅ Valider la facture</button>
       </form>
     </div>
-
-    <div class="bloc-importation">
-  <form class="upload-form" enctype="multipart/form-data">
-    <label for="facture" class="upload-label">📁 Sélectionnez un fichier de facture</label>
-    <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
-  </form>
-  <p class="upload-hint">Formats acceptés : Excel, CSV</p>
-</div>
-
 
     <div style="text-align:center">
       <a class="button return-home" href="/">Retour à l'accueil</a>
@@ -165,6 +180,41 @@ document.getElementById('facture').addEventListener('change', function () {
 
   reader.readAsArrayBuffer(file);
 });
+
+['numero_facture', 'tva', 'total_ttc'].forEach(id => {
+  const el = document.getElementById(id);
+
+  const errorMsg = document.createElement('div');
+  errorMsg.style.color = 'red';
+  errorMsg.style.fontSize = '0.8em';
+  errorMsg.style.display = 'none';
+  errorMsg.textContent = '❌ Chiffres et un seul point uniquement';
+  el.parentNode.appendChild(errorMsg);
+
+  el.addEventListener('input', () => {
+    let value = el.value;
+
+    // Supprimer tous les caractères sauf chiffres et points
+    value = value.replace(/[^0-9.]/g, '');
+
+    // Ne garder qu’un seul point
+    const parts = value.split('.');
+    if (parts.length > 2) {
+      value = parts[0] + '.' + parts.slice(1).join('').replace(/\./g, '');
+    }
+
+    if (el.value !== value) {
+      el.style.backgroundColor = '#ffdddd';
+      errorMsg.style.display = 'block';
+    } else {
+      el.style.backgroundColor = '';
+      errorMsg.style.display = 'none';
+    }
+
+    el.value = value;
+  });
+});
+
 </script>
 </body>
 </html>
