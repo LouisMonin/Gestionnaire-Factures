@@ -1023,7 +1023,10 @@ form.upload-form {
 .cursor-pointer {
     cursor: pointer;
 }
-/* Style général */
+
+
+
+/* Catégorie factures A RANGER */
 .categorie-cell select {
     color: rgb(0, 0, 0);
     text-align: center;

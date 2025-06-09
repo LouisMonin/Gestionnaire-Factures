@@ -37,7 +37,7 @@
                 <th>Payée</th>
                 <th>Fichier</th>
                 <th>Catégorisation</th>
-                <th>Actions</th>
+                <th>Supprimer</th>
             </tr>
             {% for f in factures %}
             <tr>
@@ -74,7 +74,7 @@
   </td>
                 <td>
                     <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
-                        <button type="submit" class="danger">Supprimer</button>
+                        <button type="submit" class="danger">X</button>
                     </form>
                 </td>
                 
