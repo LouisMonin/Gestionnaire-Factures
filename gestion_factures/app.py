@@ -160,13 +160,7 @@ def afficher_factures():
     # Catégories de factures
     categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
     
-    payee_filter = request.args.get('checkbox_paiement')  # '1' si cochée, None sinon
-    filter_active = request.args.get('filter_active', '0') == '1'  # '1' si le filtre est actif
-
-    # Appliquer le filtre uniquement si la case est cochée
-    if filter_active:
-        if payee_filter == '1':
-            factures = [f for f in factures if str(f['facture_payee']) in ['0', 'False', 'false']]
+    
 
     return render_template('factures.html', factures=factures, categories=categories)
 
