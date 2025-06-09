@@ -35,9 +35,9 @@
                 <th>TVA</th>
                 <th>Total TTC</th>
                 <th>Payée</th>
-                <th>Fichier</th>
                 <th>Catégorisation</th>
                 <th>Supprimer</th>
+                <th>Fichier</th>
             </tr>
             {% for f in factures %}
             <tr>
@@ -53,15 +53,6 @@
                         <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
                     </form>
                   </td>
-                <td>
-  {% if f['nom_fichier'] %}
-    <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger">
-        📎
-    </a>
-  {% else %}
-    -
-  {% endif %}
-</td>
 
 <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
     <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
@@ -77,6 +68,16 @@
                         <button type="submit" class="danger">X</button>
                     </form>
                 </td>
+
+                <td>
+                    {% if f['nom_fichier'] %}
+                      <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger">
+                          📎
+                      </a>
+                    {% else %}
+                      -
+                    {% endif %}
+                  </td>
                 
             </tr>
             {% endfor %}
