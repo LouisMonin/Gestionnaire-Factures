@@ -29,8 +29,8 @@
           <input type="text" name="nom_entreprise" id="nom_entreprise">
         </label>
 
-        <label>Numéro de facture :
-          <input type="text" name="numero_facture" id="numero_facture" inputmode="numeric" pattern="[0-9]*">
+        <label>Libellé :
+          <input type="text" name="numero_facture" id="numero_facture">
         </label>
 
         <label>Date de facture :
@@ -41,7 +41,7 @@
           <input type="date" name="echeance" id="echeance">
         </label>
 
-        <label>TVA (%) :
+        <label>TVA (XX%) :
           <input type="text" name="tva" id="tva" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
 
@@ -143,7 +143,6 @@ document.getElementById('facture').addEventListener('change', function () {
     };
 
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
-    document.getElementById("numero_facture").value = findValue(["numero de facture", "facture"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
@@ -181,7 +180,7 @@ document.getElementById('facture').addEventListener('change', function () {
   reader.readAsArrayBuffer(file);
 });
 
-['numero_facture', 'tva', 'total_ttc'].forEach(id => {
+['tva', 'total_ttc'].forEach(id => {
   const el = document.getElementById(id);
 
   const errorMsg = document.createElement('div');
