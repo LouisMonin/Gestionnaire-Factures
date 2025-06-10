@@ -120,6 +120,7 @@ def upload():
         numero_facture = request.form.get("numero_facture")
         date_facture = request.form.get("date_facture")
         echeance = request.form.get("echeance")
+        total_ht = request.form.get("total_ht")
         tva = request.form.get("tva")
         total_ttc = request.form.get("total_ttc")
         somme_finale = request.form.get("somme_finale")
@@ -159,8 +160,8 @@ def afficher_factures():
 
     # Catégories de factures
     categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
-    
-    
+
+
 
     return render_template('factures.html', factures=factures, categories=categories)
 
@@ -191,7 +192,7 @@ def modifier_categorie(facture_id):
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', (nouvelle_categorie, facture_id, session['utilisateur_id']))
-    
+
     conn.commit()
     conn.close()
     return redirect(url_for('afficher_factures'))
