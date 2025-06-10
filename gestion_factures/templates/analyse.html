@@ -233,10 +233,10 @@
         new Chart(pieCtx, {
             type: 'doughnut',
             data: {
-                labels: {{ fournisseurs_repart | tojson | safe }},
+                labels: {{ categories_repart | tojson | safe }},
                 datasets: [{
-                    label: 'Dépenses par fournisseur',
-                    data: {{ montants_fournisseurs | tojson | safe }},
+                    label: 'Dépenses par catégorie',
+                    data: {{ montants_categories | tojson | safe }},
                     backgroundColor: ['#007BFF', '#6c757d', '#17a2b8', '#28a745', '#ffc107', '#dc3545']
                 }]
             },

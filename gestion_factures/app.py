@@ -289,7 +289,11 @@ def analyse():
     c.execute('SELECT DISTINCT fournisseur FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     fournisseurs = [row[0] for row in c.fetchall()]
 
-    query_repart = 'SELECT fournisseur, SUM(REPLACE(montant_total, ",", ".")) FROM factures WHERE utilisateur_id = ?'
+    query_repart = '''
+        SELECT categorie, SUM(REPLACE(montant_total, ",", "."))
+        FROM factures
+        WHERE utilisateur_id = ? AND facture_payee = 1
+    '''
     params_repart = [session['utilisateur_id']]
 
     if date_debut:
@@ -298,11 +302,8 @@ def analyse():
     if date_fin:
         query_repart += ' AND date_facture <= ?'
         params_repart.append(date_fin)
-    if fournisseur and fournisseur != 'Tous':
-        query_repart += ' AND fournisseur = ?'
-        params_repart.append(fournisseur)
 
-    query_repart += ' GROUP BY fournisseur'
+    query_repart += ' GROUP BY categorie'
     c.execute(query_repart, params_repart)
 
     repartition = c.fetchall()
@@ -414,8 +415,8 @@ def analyse():
         montants_cumul=montants_cumul,
         fournisseurs=fournisseurs,
         fournisseur_actuel=fournisseur,
-        fournisseurs_repart=[r[0] for r in repartition],
-        montants_fournisseurs=[float(r[1]) for r in repartition],
+        categories_repart=[r[0] for r in repartition],
+        montants_categories=[float(r[1]) for r in repartition],
         date_debut=date_debut,
         date_fin=date_fin,
         total_annee=total_annee,
