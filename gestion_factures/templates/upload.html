@@ -41,6 +41,10 @@
           <input type="date" name="echeance" id="echeance">
         </label>
 
+        <label>Total HT :
+          <input type="text" name="total_ht" id="total_ht" inputmode="decimal" pattern="^\d*\.?\d*$">
+        </label>
+
         <label>TVA (XX%) :
           <input type="text" name="tva" id="tva" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
@@ -145,6 +149,7 @@ document.getElementById('facture').addEventListener('change', function () {
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
+    document.getElementById("total_ht").value = cleanValue(findValue(["sous total", "sous-total", "soustotal", "total ht", "totalht", "ht"]));
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
     document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc"]));
     document.getElementById("nom_fichier").value = file.name;
@@ -170,7 +175,7 @@ document.getElementById('facture').addEventListener('change', function () {
         }
       }
     };
-
+    fallbackFromDOM("sous-total", "total_ht");
     fallbackFromDOM("taux de tva", "tva");
     fallbackFromDOM("total ttc", "total_ttc");
 
