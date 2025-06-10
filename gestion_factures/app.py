@@ -145,9 +145,6 @@ def upload():
 
     return render_template('upload.html')
 
-
-
-
 @app.route('/factures')
 def afficher_factures():
     """ Route pour afficher les factures de l'utilisateur """
