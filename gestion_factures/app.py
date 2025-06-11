@@ -340,11 +340,24 @@ def analyse():
 
     # Cumul à l’échéance selon paiement -----------------------------------
 
-    c.execute('''
+   query_echeance = '''
         SELECT echeance, REPLACE(montant_total, ",", "."), facture_payee
         FROM factures
         WHERE utilisateur_id = ?
-    ''', (session['utilisateur_id'],))
+    '''
+    params_echeance = [session['utilisateur_id']]
+
+    if date_debut:
+        query_echeance += ' AND echeance >= ?'
+        params_echeance.append(date_debut)
+    if date_fin:
+        query_echeance += ' AND echeance <= ?'
+        params_echeance.append(date_fin)
+    if fournisseur and fournisseur != 'Tous':
+        query_echeance += ' AND fournisseur = ?'
+        params_echeance.append(fournisseur)
+
+    c.execute(query_echeance, params_echeance)
     factures_brutes = c.fetchall()
 
     factures_payees = []
