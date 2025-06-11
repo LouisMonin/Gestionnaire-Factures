@@ -153,6 +153,29 @@ def upload():
 
     return render_template('upload.html')
 
+@app.route('/analyse_pdf', methods=['POST'])
+def analyse_pdf():
+    """ Analyse un fichier PDF envoyé via JavaScript et retourne les données extraites """
+    fichier = request.files.get('facture_pdf')
+    if not fichier:
+        return jsonify({"error": "Aucun fichier reçu"}), 400
+
+    try:
+        chemin_temp = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_facture.pdf')
+        fichier.save(chemin_temp)
+
+        images = convert_from_path(chemin_temp, dpi=300)
+        texte = ""
+        for image in images:
+            texte += pytesseract.image_to_string(image)
+
+        infos = extraire_infos(texte)
+        return jsonify(infos)
+    except Exception as e:
+        print(f"Erreur d'analyse PDF : {e}")
+        return jsonify({"error": "Erreur lors de l'analyse PDF"}), 500
+
+
 
 @app.route('/factures')
 def afficher_factures():

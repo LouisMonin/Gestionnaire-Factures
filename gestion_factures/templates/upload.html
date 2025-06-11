@@ -16,7 +16,7 @@
         <h3>📝 Informations extraites</h3>
         <label for="facture" class="upload-label">📁 Sélectionnez un fichier de facture</label>
         <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
-        <p class="upload-hint">Formats acceptés : Excel, CSV</p>
+        <p class="upload-hint">Formats acceptés : Excel, CSV, PDF</p>
         <input type="hidden" name="nom_fichier" id="nom_fichier">
         <label>Nom entreprise :
           <input type="text" name="nom_entreprise" id="nom_entreprise">
@@ -64,5 +64,32 @@
   </div>
   {% include 'footer.html' %}
   <script src="/static/upload.js"></script>
+  <script>
+    document.getElementById('facture').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (file.type === 'application/pdf') {
+        const formData = new FormData();
+        formData.append('facture_pdf', file);
+
+        fetch('/analyse_pdf', {
+          method: 'POST',
+          body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("nom_entreprise").value = data.fournisseur || '';
+          document.getElementById("date_facture").value = data.date_facture || '';
+          document.getElementById("numero_facture").value = data.numero_facture || '';
+          document.getElementById("total_ttc").value = data.montant_total || '';
+          document.getElementById("tva").value = data.TVA || '';
+          document.getElementById("nom_fichier").value = file.name;
+          document.getElementById("facture-formulaire").style.display = 'block';
+        })
+        .catch(err => console.error('Erreur PDF:', err));
+      }
+    });
+  </script>
 </body>
 </html>

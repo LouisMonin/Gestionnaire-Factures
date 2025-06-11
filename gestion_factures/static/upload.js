@@ -1,12 +1,44 @@
 document.getElementById('facture').addEventListener('change', function () {
   const file = this.files[0];
-  const preview = document.getElementById('preview');
   const form = document.getElementById('facture-formulaire');
+  const preview = document.getElementById('preview');
 
   preview.innerHTML = '';
+  preview.style.display = 'none';
   form.style.display = 'none';
+
   if (!file) return;
 
+  const extension = file.name.split('.').pop().toLowerCase();
+
+  // 🔍 Cas PDF : envoi vers Flask
+  if (extension === 'pdf') {
+    const formData = new FormData();
+    formData.append('facture_pdf', file);
+
+    fetch('/analyse_pdf', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById("nom_entreprise").value = data.fournisseur || '';
+      document.getElementById("date_facture").value = data.date_facture || '';
+      document.getElementById("numero_facture").value = data.numero_facture || '';
+      document.getElementById("total_ttc").value = data.montant_total || '';
+      document.getElementById("tva").value = data.TVA || '';
+      document.getElementById("nom_fichier").value = file.name;
+      form.style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Erreur PDF:', err);
+      alert("❌ Erreur lors de l'analyse du fichier PDF.");
+    });
+
+    return;
+  }
+
+  // 🔍 Cas Excel / CSV
   const reader = new FileReader();
   reader.onload = function (e) {
     const data = new Uint8Array(e.target.result);
@@ -76,7 +108,6 @@ document.getElementById('facture').addEventListener('change', function () {
       return '';
     };
 
-    // Détection automatique de la catégorie basée sur le nom de l'entreprise ou du contenu
     const detectCategory = () => {
       const nomEntreprise = findValue(["nom entreprise", "nomentreprise"]).toLowerCase();
       const allText = rows.flat().join(' ').toLowerCase();
@@ -105,7 +136,6 @@ document.getElementById('facture').addEventListener('change', function () {
       return 'Non-catégorisée';
     };
 
-    // Remplissage automatique des champs
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
@@ -113,8 +143,6 @@ document.getElementById('facture').addEventListener('change', function () {
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
     document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc"]));
     document.getElementById("nom_fichier").value = file.name;
-
-    // Détection automatique de la catégorie
     document.getElementById("categorie").value = detectCategory();
 
     const fallbackFromDOM = (label, fieldId) => {
@@ -148,7 +176,7 @@ document.getElementById('facture').addEventListener('change', function () {
   reader.readAsArrayBuffer(file);
 });
 
-// Validation des champs numériques
+// ✅ Validation des champs numériques
 ['total_ht', 'tva', 'total_ttc'].forEach(id => {
   const el = document.getElementById(id);
 
@@ -161,7 +189,6 @@ document.getElementById('facture').addEventListener('change', function () {
 
   el.addEventListener('input', () => {
     let value = el.value;
-
     value = value.replace(/[^0-9.]/g, '');
     const parts = value.split('.');
     if (parts.length > 2) {
@@ -180,13 +207,12 @@ document.getElementById('facture').addEventListener('change', function () {
   });
 });
 
-// Validation des dates
+// ✅ Validation des dates
 function validateDates() {
   const dateFacture = document.getElementById('date_facture');
   const dateEcheance = document.getElementById('echeance');
   const today = new Date().toISOString().split('T')[0];
 
-  // Validation date de facture (ne peut pas être dans le futur)
   if (dateFacture.value && dateFacture.value > today) {
     dateFacture.style.backgroundColor = '#ffdddd';
     showDateError(dateFacture, '❌ La date doit être antérieure ou égale à aujourd\'hui');
@@ -196,10 +222,9 @@ function validateDates() {
     hideDateError(dateFacture);
   }
 
-  // Validation date d'échéance (ne peut pas être avant la date de facture)
   if (dateFacture.value && dateEcheance.value && dateEcheance.value < dateFacture.value) {
     dateEcheance.style.backgroundColor = '#ffdddd';
-    showDateError(dateEcheance, '❌ La date d\'échéance doit être postérieur à la date de facture');
+    showDateError(dateEcheance, '❌ La date d\'échéance doit être postérieure à la date de facture');
     return false;
   } else {
     dateEcheance.style.backgroundColor = '';
@@ -229,6 +254,5 @@ function hideDateError(element) {
   }
 }
 
-// Ajouter les événements de validation sur les champs de date
 document.getElementById('date_facture').addEventListener('change', validateDates);
 document.getElementById('echeance').addEventListener('change', validateDates);
