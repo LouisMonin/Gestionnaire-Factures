@@ -643,7 +643,25 @@ def extraire_infos(texte):
         "somme_finale": extract_first_matching(["somme finale"], lines)
     }
 
+@app.route('/analyse_image', methods=['POST'])
+def analyse_image():
+    """ Analyse une image de facture PNG/JPG/JPEG et retourne les données extraites """
+    fichier = request.files.get('facture_image')
+    if not fichier:
+        return jsonify({"error": "Aucun fichier image reçu"}), 400
 
+    try:
+        chemin_temp = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_image_facture.png')
+        fichier.save(chemin_temp)
+
+        image = Image.open(chemin_temp)
+        texte = pytesseract.image_to_string(image)
+        infos = extraire_infos(texte)
+        return jsonify(infos)
+
+    except Exception as e:
+        print(f"Erreur /analyse_image : {e}")
+        return jsonify({"error": "Erreur lors de l'analyse de l'image"}), 500
 
 
 if __name__ == "__main__":

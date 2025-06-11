@@ -1152,11 +1152,12 @@ body {
 
 .container.upload h1 {
   text-align: center;
-  color: white;
-  font-size: 2.5rem;
-  font-weight: 300;
+  color: #1f2c3a; /* Couleur exacte de l’image */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Police proche de celle utilisée */
+  font-size: 2rem;
+  font-weight: 600; /* Plus proche du rendu de l’image */
   margin-bottom: 3rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  text-shadow: none; /* Suppression de l’ombre */
 }
 
 /* Container principal */

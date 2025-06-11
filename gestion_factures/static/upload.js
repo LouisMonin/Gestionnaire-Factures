@@ -57,6 +57,44 @@ preview.style.display = 'block';
   return;
 }
 
+// 🔍 Cas image (PNG, JPG, JPEG)
+if (['png', 'jpg', 'jpeg'].includes(extension)) {
+  const formData = new FormData();
+  formData.append('facture_image', file);
+
+  fetch('/analyse_image', {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("nom_entreprise").value = data.fournisseur || '';
+    document.getElementById("numero_facture").value = data.numero_facture || '';
+    document.getElementById("date_facture").value = data.date_facture || '';
+    document.getElementById("echeance").value = data.echeance || '';
+    document.getElementById("total_ht").value = data.total_ht || '';
+    document.getElementById("tva").value = data.TVA || '';
+    document.getElementById("total_ttc").value = data.montant_total || '';
+    document.getElementById("nom_fichier").value = file.name;
+
+    form.style.display = 'block';
+
+    // 👇 AFFICHAGE DE L'IMAGE
+    const url = URL.createObjectURL(file);
+    preview.innerHTML = `
+      <img src="${url}" style="width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1);" />
+    `;
+    preview.style.display = 'block';
+  })
+  .catch(err => {
+    console.error('Erreur image :', err);
+    alert("❌ Erreur lors de l'analyse du fichier image.");
+  });
+
+  return;
+}
+
+
 
   // 🔍 Cas Excel / CSV
   const reader = new FileReader();
