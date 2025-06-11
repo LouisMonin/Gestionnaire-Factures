@@ -1,18 +1,270 @@
-<header class="header">
-    <div class="logo">
-        <img src="/static/logo.png" alt="Logo" style="height: 100px;">
-    </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <nav class="nav-links">
-        <a href="/">Accueil</a>
-        <a href="/upload">Importer une facture</a>
-        <a href="/factures">Voir les factures</a>
-        <a href="/analyse">Analyse graphique</a>
-        <a href="/factures/json/page">JSON</a>
-    </nav>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <div class="user-info" style="text-align: right; padding: 15px 25px; font-size: 0.95em;">
-        Bonjour <strong>{{ pseudo }}</strong> &nbsp; | &nbsp;
-        <a href="/logout" style="color: #007bff; text-decoration: none;">Se déconnecter</a>
-    </div>
-</header>
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 40px 15px 20px;
+            position: relative;
+            z-index: 2;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .left-section {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            flex: 1;
+            max-width: 70%;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-right: 10px;
+        }
+
+        .logo img {
+            height: 80px;
+            width: auto;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+            transition: transform 0.3s ease;
+        }
+
+        .logo img:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.95em;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-links a::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .nav-links a:hover::before {
+            left: 100%;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-links a:active {
+            transform: translateY(0);
+        }
+
+        .user-info {
+            color: white;
+            font-size: 0.95em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+            margin-left: 40px;
+        }
+
+        .user-info strong {
+            color: #fff;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .user-info .separator {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: 300;
+        }
+
+        .logout-link {
+            color: #ffeb3b !important;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            padding: 6px 12px;
+            border-radius: 15px;
+            background: rgba(255, 235, 59, 0.1);
+        }
+
+        .logout-link:hover {
+            background: rgba(255, 235, 59, 0.2);
+            transform: scale(1.05);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Animation d'entrée */
+        .header-content > * {
+            animation: slideInFromTop 0.6s ease-out;
+        }
+
+        .nav-links a:nth-child(1) { animation-delay: 0.1s; }
+        .nav-links a:nth-child(2) { animation-delay: 0.2s; }
+        .nav-links a:nth-child(3) { animation-delay: 0.3s; }
+        .nav-links a:nth-child(4) { animation-delay: 0.4s; }
+        .nav-links a:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideInFromTop {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .header-content {
+                padding: 15px 20px;
+            }
+
+            .left-section {
+                gap: 25px;
+            }
+
+            .nav-links {
+                gap: 5px;
+            }
+
+            .nav-links a {
+                padding: 10px 16px;
+                font-size: 0.9em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .left-section {
+                flex-direction: column;
+                gap: 20px;
+                width: 100%;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+            }
+
+            .nav-links a {
+                padding: 8px 14px;
+                font-size: 0.85em;
+            }
+
+            .user-info {
+                align-self: stretch;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                gap: 5px;
+            }
+
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 0.8em;
+            }
+
+            .logo img {
+                height: 65px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="left-section">
+                <div class="logo">
+                    <img src="/static/logo.png" alt="Logo">
+                </div>
+                <nav class="nav-links">
+                    <a href="/">Accueil</a>
+                    <a href="/upload">Importer une facture</a>
+                    <a href="/factures">Voir les factures</a>
+                    <a href="/analyse">Analyse graphique</a>
+                    <a href="/factures/json/page">JSON</a>
+                </nav>
+            </div>
+            <div class="user-info">
+                Bonjour <strong>{{ pseudo }}</strong>
+                <span class="separator">|</span>
+                <a href="/logout" class="logout-link">Se déconnecter</a>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

@@ -76,6 +76,36 @@ document.getElementById('facture').addEventListener('change', function () {
       return '';
     };
 
+    // Détection automatique de la catégorie basée sur le nom de l'entreprise ou du contenu
+    const detectCategory = () => {
+      const nomEntreprise = findValue(["nom entreprise", "nomentreprise"]).toLowerCase();
+      const allText = rows.flat().join(' ').toLowerCase();
+
+      if (nomEntreprise.includes('edf') || nomEntreprise.includes('engie') || nomEntreprise.includes('électricité') ||
+          allText.includes('électricité') || allText.includes('kwh') || allText.includes('consommation électrique')) {
+        return 'Électricité';
+      }
+      if (nomEntreprise.includes('veolia') || nomEntreprise.includes('suez') || nomEntreprise.includes('eau') ||
+          allText.includes('eau') || allText.includes('m3') || allText.includes('consommation eau')) {
+        return 'Eau';
+      }
+      if (nomEntreprise.includes('orange') || nomEntreprise.includes('sfr') || nomEntreprise.includes('bouygues') ||
+          nomEntreprise.includes('free') || nomEntreprise.includes('internet') || nomEntreprise.includes('box') ||
+          allText.includes('internet') || allText.includes('adsl') || allText.includes('fibre')) {
+        return 'Internet';
+      }
+      if (nomEntreprise.includes('téléphone') || nomEntreprise.includes('mobile') ||
+          allText.includes('téléphone') || allText.includes('mobile') || allText.includes('forfait')) {
+        return 'Téléphone';
+      }
+      if (nomEntreprise.includes('assurance') || nomEntreprise.includes('axa') || nomEntreprise.includes('maif') ||
+          nomEntreprise.includes('macif') || allText.includes('assurance') || allText.includes('prime')) {
+        return 'Assurance';
+      }
+      return 'Non-catégorisée';
+    };
+
+    // Remplissage automatique des champs
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
@@ -83,6 +113,9 @@ document.getElementById('facture').addEventListener('change', function () {
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
     document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc"]));
     document.getElementById("nom_fichier").value = file.name;
+
+    // Détection automatique de la catégorie
+    document.getElementById("categorie").value = detectCategory();
 
     const fallbackFromDOM = (label, fieldId) => {
       if (!document.getElementById(fieldId).value) {
@@ -115,6 +148,7 @@ document.getElementById('facture').addEventListener('change', function () {
   reader.readAsArrayBuffer(file);
 });
 
+// Validation des champs numériques
 ['total_ht', 'tva', 'total_ttc'].forEach(id => {
   const el = document.getElementById(id);
 
@@ -145,3 +179,56 @@ document.getElementById('facture').addEventListener('change', function () {
     el.value = value;
   });
 });
+
+// Validation des dates
+function validateDates() {
+  const dateFacture = document.getElementById('date_facture');
+  const dateEcheance = document.getElementById('echeance');
+  const today = new Date().toISOString().split('T')[0];
+
+  // Validation date de facture (ne peut pas être dans le futur)
+  if (dateFacture.value && dateFacture.value > today) {
+    dateFacture.style.backgroundColor = '#ffdddd';
+    showDateError(dateFacture, '❌ La date doit être antérieure ou égale à aujourd\'hui');
+    return false;
+  } else {
+    dateFacture.style.backgroundColor = '';
+    hideDateError(dateFacture);
+  }
+
+  // Validation date d'échéance (ne peut pas être avant la date de facture)
+  if (dateFacture.value && dateEcheance.value && dateEcheance.value < dateFacture.value) {
+    dateEcheance.style.backgroundColor = '#ffdddd';
+    showDateError(dateEcheance, '❌ La date d\'échéance doit être postérieur à la date de facture');
+    return false;
+  } else {
+    dateEcheance.style.backgroundColor = '';
+    hideDateError(dateEcheance);
+  }
+
+  return true;
+}
+
+function showDateError(element, message) {
+  let errorMsg = element.parentNode.querySelector('.date-error');
+  if (!errorMsg) {
+    errorMsg = document.createElement('div');
+    errorMsg.className = 'date-error';
+    errorMsg.style.color = 'red';
+    errorMsg.style.fontSize = '0.8em';
+    element.parentNode.appendChild(errorMsg);
+  }
+  errorMsg.textContent = message;
+  errorMsg.style.display = 'block';
+}
+
+function hideDateError(element) {
+  const errorMsg = element.parentNode.querySelector('.date-error');
+  if (errorMsg) {
+    errorMsg.style.display = 'none';
+  }
+}
+
+// Ajouter les événements de validation sur les champs de date
+document.getElementById('date_facture').addEventListener('change', validateDates);
+document.getElementById('echeance').addEventListener('change', validateDates);

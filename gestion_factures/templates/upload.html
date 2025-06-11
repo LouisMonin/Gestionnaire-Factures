@@ -8,61 +8,61 @@
 </head>
 <body class="upload-page">
   {% include 'header.html' %}
-
   <div class="container upload">
     <h1>Importer une facture</h1>
-
     <div class="flex-container">
       <div id="preview" class="upload-preview" style="flex:1; display: none;"></div>
-
       <form id="facture-formulaire" class="facture-form" method="POST" enctype="multipart/form-data" style="flex:1;">
         <h3>📝 Informations extraites</h3>
-
         <label for="facture" class="upload-label">📁 Sélectionnez un fichier de facture</label>
         <input type="file" id="facture" name="facture" accept=".pdf,.png,.jpg,.jpeg,.csv,.xls,.xlsx" required>
         <p class="upload-hint">Formats acceptés : Excel, CSV</p>
-
         <input type="hidden" name="nom_fichier" id="nom_fichier">
-
         <label>Nom entreprise :
           <input type="text" name="nom_entreprise" id="nom_entreprise">
         </label>
-
         <label>Libellé :
           <input type="text" name="numero_facture" id="numero_facture">
         </label>
-
         <label>Date de facture :
           <input type="date" name="date_facture" id="date_facture">
         </label>
-
         <label>Échéance :
           <input type="date" name="echeance" id="echeance">
         </label>
-
+        <label>Catégorie :
+          <select name="categorie" id="categorie">
+            <option value="Non-catégorisée">Non-catégorisée</option>
+            <option value="Électricité">Électricité</option>
+            <option value="Eau">Eau</option>
+            <option value="Internet">Internet</option>
+            <option value="Téléphone">Téléphone</option>
+            <option value="Assurance">Assurance</option>
+            <option value="Autre">Autre</option>
+          </select>
+        </label>
         <label>Total HT :
           <input type="text" name="total_ht" id="total_ht" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
-
         <label>TVA (XX%) :
           <input type="text" name="tva" id="tva" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
-
         <label>Total TTC :
           <input type="text" name="total_ttc" id="total_ttc" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
-
+        <label class="checkbox-label">
+          <input type="checkbox" name="payee" id="payee" value="1">
+          <span class="checkmark">✅</span>
+          Facture payée
+        </label>
         <button type="submit">✅ Valider la facture</button>
       </form>
     </div>
-
     <div style="text-align:center">
       <a class="button return-home" href="/">Retour à l'accueil</a>
     </div>
   </div>
-
   {% include 'footer.html' %}
-
   <script src="/static/upload.js"></script>
 </body>
 </html>
