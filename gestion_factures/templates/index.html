@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="accueil-page">
     {% include 'header.html' %}
     <div class="container">
         <section class="hero">
@@ -32,7 +32,7 @@
                             <small class="gris">dont {{ nb_mois }} ce mois-ci</small>
                         </p>
                     </div>
-                    <div class="kpi">
+                    <div class="kpi {% if factures_en_retard|length > 0 %}alerte{% endif %}">
                         <h3>Nombre de factures impayées</h3>
                         <p>
                             {{ factures_en_retard | length + factures_a_venir | length }}
