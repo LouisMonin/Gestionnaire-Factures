@@ -30,29 +30,38 @@ def init_db():
         numero_client TEXT,
         echeance TEXT,
         somme_finale TEXT,
+        categorie TEXT DEFAULT 'Non-catégorisée',
         FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
     )''')
+
+    # Migration pour ajouter la colonne categorie si elle n'existe pas déjà
+    try:
+        c.execute('ALTER TABLE factures ADD COLUMN categorie TEXT DEFAULT "Non-catégorisée"')
+        print("✅ Colonne 'categorie' ajoutée à la table factures")
+    except sqlite3.OperationalError as e:
+        if "duplicate column name" in str(e).lower():
+            print("ℹ️ Colonne 'categorie' déjà présente dans la table factures")
+        else:
+            print(f"❌ Erreur lors de l'ajout de la colonne categorie : {e}")
 
     conn.commit()
     conn.close()
 
-
 def insert_facture(fournisseur, date_facture, numero_facture, montant_total, tva,
-                   utilisateur_id, nom_fichier, facture_payee, numero_client, echeance, somme_finale):
+                   utilisateur_id, nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie="Non-catégorisée"):
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
     c.execute('''
         INSERT INTO factures (
             fournisseur, date_facture, numero_facture, montant_total, TVA, utilisateur_id,
-            nom_fichier, facture_payee, numero_client, echeance, somme_finale
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
         fournisseur, date_facture, numero_facture, montant_total, tva, utilisateur_id,
-        nom_fichier, facture_payee, numero_client, echeance, somme_finale
+        nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie
     ))
     conn.commit()
     conn.close()
-
 
 def ajouter_utilisateur(nom, prenom, age, secteur, email, pseudo, mot_de_passe):
     conn = sqlite3.connect('factures.db')
@@ -68,7 +77,6 @@ def ajouter_utilisateur(nom, prenom, age, secteur, email, pseudo, mot_de_passe):
     conn.commit()
     conn.close()
     return True
-
 
 def verifier_utilisateur(pseudo, mot_de_passe):
     conn = sqlite3.connect('factures.db')

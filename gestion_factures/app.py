@@ -22,6 +22,7 @@ import pandas as pd
 from datetime import datetime, date
 from collections import defaultdict
 
+
 """ Configuration de l'application Flask """
 
 app = Flask(__name__)
@@ -100,7 +101,7 @@ def upload():
             nom_fichier = fichier.filename
             chemin_fichier = os.path.join(app.config['UPLOAD_FOLDER'], nom_fichier)
 
-            # Crée le dossier s’il n’existe pas
+            # Crée le dossier s'il n'existe pas
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
             try:
@@ -124,8 +125,14 @@ def upload():
         tva = request.form.get("tva")
         total_ttc = request.form.get("total_ttc")
         somme_finale = request.form.get("somme_finale")
-        facture_payee = 0
 
+        # Récupération de la catégorie depuis le formulaire
+        categorie = request.form.get("categorie", "Non-catégorisée")
+
+        # Récupération de l'état de paiement depuis la checkbox
+        facture_payee = 1 if request.form.get("payee") == "1" else 0
+
+        # Appel de la fonction insert_facture avec tous les paramètres, y compris la catégorie
         insert_facture(
             nom_entreprise,
             date_facture,
@@ -137,13 +144,38 @@ def upload():
             facture_payee,
             numero_client,
             echeance,
-            somme_finale
+            somme_finale,
+            categorie  # Ajout du paramètre catégorie
         )
 
         flash("✅ Facture enregistrée avec succès.", "success")
         return redirect(url_for('accueil'))
 
     return render_template('upload.html')
+
+@app.route('/analyse_pdf', methods=['POST'])
+def analyse_pdf():
+    """ Analyse un fichier PDF envoyé via JavaScript et retourne les données extraites """
+    fichier = request.files.get('facture_pdf')
+    if not fichier:
+        return jsonify({"error": "Aucun fichier reçu"}), 400
+
+    try:
+        chemin_temp = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_facture.pdf')
+        fichier.save(chemin_temp)
+
+        images = convert_from_path(chemin_temp, dpi=300)
+        texte = ""
+        for image in images:
+            texte += pytesseract.image_to_string(image)
+
+        infos = extraire_infos(texte)
+        return jsonify(infos)
+    except Exception as e:
+        print(f"Erreur d'analyse PDF : {e}")
+        return jsonify({"error": "Erreur lors de l'analyse PDF"}), 500
+
+
 
 @app.route('/factures')
 def afficher_factures():
@@ -500,8 +532,6 @@ def supprimer_tout():
     conn.commit()
     conn.close()
     return redirect('/factures')
-
-from flask import send_from_directory
 
 @app.route('/uploads/<path:filename>')
 def telecharger_fichier(filename):
