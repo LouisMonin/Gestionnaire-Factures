@@ -128,7 +128,7 @@ button, a.button {
 }
 
 .kpi {
-    background: #f9f9f9;
+    background: #fff;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
@@ -1027,6 +1027,53 @@ form.upload-form {
 
 .cursor-pointer {
     cursor: pointer;
+}
+
+/* === KPI PAGE D'ACCUEIL === */
+
+.accueil-page .kpi-cards {
+    display: flex;
+    gap: 0.7 rem;
+    margin-top: 1rem;
+}
+
+.accueil-page .kpi {
+    flex: 1;
+    background-color: #fffefe;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    font-family: 'Inter', sans-serif;
+}
+
+.accueil-page .kpi h3 {
+    font-size: 0.6 rem;
+    margin-bottom: 0.3rem;
+    color: #333;
+}
+
+.accueil-page .kpi p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #764ba2; /* Violet principal */
+    margin: 0;
+}
+
+.accueil-page .kpi small {
+    display: block;
+    font-size: 0.7rem;
+    margin-top: 0.3rem;
+    color: #444; /* gris foncé */
+}
+
+.accueil-page .kpi small span {
+    color: #764ba2; /* violet */
+    font-weight: 600;
+}
+
+/* Carte impayée avec retards : fond rouge pâle */
+.accueil-page .kpi.alerte {
+    background-color: #ffe3e3; /* rouge pâle */
 }
 
 

@@ -102,13 +102,19 @@
             </div>
         </div>
 
-        <form method="POST" class="form-filtres">
+    <form method="POST" class="form-filtres" style="display: flex; flex-wrap: wrap; gap: 1.5em; align-items: flex-end;">
+
+        <div style="display: flex; flex-direction: column;">
             <label for="date_debut">Date début :</label>
             <input type="date" name="date_debut" value="{{ date_debut or '' }}">
+        </div>
 
+        <div style="display: flex; flex-direction: column;">
             <label for="date_fin">Date fin :</label>
             <input type="date" name="date_fin" value="{{ date_fin or '' }}">
+        </div>
 
+        <div style="display: flex; flex-direction: column;">
             <label for="fournisseur">Fournisseur :</label>
             <select name="fournisseur">
                 <option value="Tous">Tous</option>
@@ -116,31 +122,30 @@
                     <option value="{{ f }}" {% if f == fournisseur_actuel %}selected{% endif %}>{{ f }}</option>
                 {% endfor %}
             </select>
+        </div>
 
+        <div style="display: flex; flex-direction: column;">
+            <label>Filtrer selon :</label>
+            <div class="radio-group" style="display: flex; flex-direction: column; gap: 0.5em; margin-top: 0.25em;">
+                <label>
+                    <input type="radio" name="filtre_date" value="date_facture" {% if filtre_date == 'date_facture' or not filtre_date %}checked{% endif %}>
+                    Date de facture
+                </label>
+                <label>
+                    <input type="radio" name="filtre_date" value="echeance" {% if filtre_date == 'echeance' %}checked{% endif %}>
+                    Date d'échéance
+                </label>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5em; flex-wrap: wrap;">
             <button type="submit" name="action" value="filtrer" class="button">🔎 Filtrer</button>
             <button type="submit" formaction="/export_csv" class="button">⬇️ Export CSV</button>
             <button type="submit" name="action" value="reset" class="button danger">Réinitialiser</button>
-        </form>
+        </div>
 
+    </form>
 
-        <!-- <div class="kpi-cards">
-            <div class="kpi">
-                <h3>Total facturé</h3>
-                <p>{{ "{:.2f}".format(montants | sum | float) }} €</p>
-            </div>
-            <div class="kpi">
-                <h3>Nombre de factures</h3>
-                <p>{{ montants | length }}</p>
-            </div>
-            <div class="kpi">
-                <h3>Fournisseur principal</h3>
-                <p>{{ fournisseurs_repart[0] if fournisseurs_repart else "N/A" }}</p>
-            </div>
-            <div class="kpi">
-                <h3>Montant moyen</h3>
-                <p>{{ "{:.2f}".format((montants | sum) / (montants | length)) if montants else "0.00" }} €</p>
-            </div>
-        </div> -->
 
 
         <div class="chart-wrapper">
