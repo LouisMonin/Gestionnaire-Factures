@@ -254,6 +254,37 @@ function validateDates() {
   return true;
 }
 
+function validateMontants() {
+  const ht = parseFloat(document.getElementById('total_ht').value);
+  const ttc = parseFloat(document.getElementById('total_ttc').value);
+
+  const elHT = document.getElementById('total_ht');
+  const elTTC = document.getElementById('total_ttc');
+
+  let error = elHT.parentNode.querySelector('.montant-error');
+  if (!error) {
+    error = document.createElement('div');
+    error.className = 'montant-error';
+    error.style.color = 'red';
+    error.style.fontSize = '0.8em';
+    elTTC.parentNode.appendChild(error);
+  }
+
+  if (!isNaN(ht) && !isNaN(ttc) && ht > ttc) {
+    elHT.style.backgroundColor = '#ffdddd';
+    elTTC.style.backgroundColor = '#ffdddd';
+    error.textContent = '❌ Le montant HT doit être inférieur ou égal au montant TTC';
+    error.style.display = 'block';
+    return false;
+  } else {
+    elHT.style.backgroundColor = '';
+    elTTC.style.backgroundColor = '';
+    error.style.display = 'none';
+    return true;
+  }
+}
+
+
 function showDateError(element, message) {
   let errorMsg = element.parentNode.querySelector('.date-error');
   if (!errorMsg) {
@@ -276,3 +307,79 @@ function hideDateError(element) {
 
 document.getElementById('date_facture').addEventListener('change', validateDates);
 document.getElementById('echeance').addEventListener('change', validateDates);
+document.getElementById('total_ht').addEventListener('input', validateMontants);
+document.getElementById('total_ttc').addEventListener('input', validateMontants);
+
+document.getElementById('facture-formulaire').addEventListener('submit', function (e) {
+  const validDates = validateDates();
+  const validMontants = validateMontants();
+
+  if (!validDates || !validMontants) {
+    e.preventDefault(); // ❌ Bloque l'envoi
+    alert("⚠️ Veuillez corriger les erreurs avant de valider la facture.");
+  }
+});
+
+document.getElementById('facture-formulaire').addEventListener('submit', function (e) {
+  const validDates = validateDates();
+  const validMontants = validateMontants();
+
+  // Vérifie que les champs requis sont remplis
+  const champsObligatoires = ['nom_entreprise','date_facture', 'echeance', 'total_ttc', 'tva', 'total_ht'];
+  let champsOk = true;
+
+  champsObligatoires.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.value) {
+      el.style.backgroundColor = '#ffdddd';
+      champsOk = false;
+
+      let error = el.parentNode.querySelector('.champ-error');
+      if (!error) {
+        error = document.createElement('div');
+        error.className = 'champ-error';
+        error.style.color = 'red';
+        error.style.fontSize = '0.8em';
+        error.textContent = '❌ Ce champ est obligatoire';
+        el.parentNode.appendChild(error);
+      } else {
+        error.style.display = 'block';
+      }
+    } else {
+      el.style.backgroundColor = '';
+      const error = el.parentNode.querySelector('.champ-error');
+      if (error) error.style.display = 'none';
+    }
+  });
+
+  if (!validDates || !validMontants || !champsOk) {
+    e.preventDefault(); // ❌ Bloque la soumission
+    alert("⚠️ Veuillez corriger les erreurs ou remplir tous les champs obligatoires.");
+  }
+});
+
+document.getElementById('facture').addEventListener('change', function () {
+      const file = this.files[0];
+      if (!file) return;
+
+      if (file.type === 'application/pdf') {
+        const formData = new FormData();
+        formData.append('facture_pdf', file);
+
+        fetch('/analyse_pdf', {
+          method: 'POST',
+          body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById("nom_entreprise").value = data.fournisseur || '';
+          document.getElementById("date_facture").value = data.date_facture || '';
+          document.getElementById("numero_facture").value = data.numero_facture || '';
+          document.getElementById("total_ttc").value = data.montant_total || '';
+          document.getElementById("tva").value = data.TVA || '';
+          document.getElementById("nom_fichier").value = file.name;
+          document.getElementById("facture-formulaire").style.display = 'block';
+        })
+        .catch(err => console.error('Erreur PDF:', err));
+      }
+    });

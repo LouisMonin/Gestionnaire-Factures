@@ -1122,3 +1122,221 @@ form.upload-form {
   .categorie-cell.non_categorisee select {
     color: rgb(0, 0, 0);
   }
+
+  /* Reset et base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: #2c3e50;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+}
+
+/* Page d'upload */
+.upload-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.container.upload {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.container.upload h1 {
+  text-align: center;
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 300;
+  margin-bottom: 3rem;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Container principal */
+.flex-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+}
+
+/* Zone d'upload */
+.upload-label {
+  display: block;
+  border: 2px dashed #bdc3c7;
+  border-radius: 15px;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-bottom: 1rem;
+}
+
+.upload-label:hover {
+  border-color: #3498db;
+  background: #ebf3fd;
+  transform: translateY(-2px);
+  color: #3498db;
+}
+
+#facture {
+  display: none;
+}
+
+.upload-hint {
+  font-size: 0.9rem;
+  color: #95a5a6;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Preview */
+.upload-preview {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 2rem;
+  border: 2px solid #ecf0f1;
+  min-height: 200px;
+}
+
+/* Formulaire */
+.facture-form {
+  background: #f8f9fa;
+  border-radius: 15px;
+  padding: 2rem;
+}
+
+.facture-form h3 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.facture-form label {
+  display: block;
+  font-weight: 500;
+  color: #34495e;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.facture-form label:first-of-type {
+  margin-top: 0;
+}
+
+.facture-form input[type="text"],
+.facture-form input[type="date"],
+.facture-form select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.facture-form input[type="text"]:focus,
+.facture-form input[type="date"]:focus,
+.facture-form select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.facture-form select {
+  cursor: pointer;
+}
+
+/* Checkbox personnalisée */
+.checkbox-label {
+  display: flex !important;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  border: 2px solid #ecf0f1;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  margin-top: 1.5rem;
+}
+
+.checkbox-label:hover {
+  border-color: #3498db;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.checkmark {
+  font-size: 1rem;
+}
+
+/* Bouton de soumission */
+.facture-form button[type="submit"] {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.facture-form button[type="submit"]:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.facture-form button[type="submit"]:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .flex-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 2rem;
+    margin: 1rem;
+  }
+
+  .container.upload {
+    padding: 1rem;
+  }
+
+  .container.upload h1 {
+    font-size: 2rem;
+  }
+
+  .upload-label {
+    padding: 2rem 1rem;
+  }
+}

@@ -44,7 +44,7 @@
         <label>Total HT :
           <input type="text" name="total_ht" id="total_ht" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
-        <label>TVA (XX%) :
+        <label>TVA (XX.XX%) :
           <input type="text" name="tva" id="tva" inputmode="decimal" pattern="^\d*\.?\d*$">
         </label>
         <label>Total TTC :
@@ -55,41 +55,11 @@
           <span class="checkmark">✅</span>
           Facture payée
         </label>
-        <button type="submit">✅ Valider la facture</button>
+        <button type="submit">Valider la facture</button>
       </form>
-    </div>
-    <div style="text-align:center">
-      <a class="button return-home" href="/">Retour à l'accueil</a>
     </div>
   </div>
   {% include 'footer.html' %}
   <script src="/static/upload.js"></script>
-  <script>
-    document.getElementById('facture').addEventListener('change', function () {
-      const file = this.files[0];
-      if (!file) return;
-
-      if (file.type === 'application/pdf') {
-        const formData = new FormData();
-        formData.append('facture_pdf', file);
-
-        fetch('/analyse_pdf', {
-          method: 'POST',
-          body: formData
-        })
-        .then(r => r.json())
-        .then(data => {
-          document.getElementById("nom_entreprise").value = data.fournisseur || '';
-          document.getElementById("date_facture").value = data.date_facture || '';
-          document.getElementById("numero_facture").value = data.numero_facture || '';
-          document.getElementById("total_ttc").value = data.montant_total || '';
-          document.getElementById("tva").value = data.TVA || '';
-          document.getElementById("nom_fichier").value = file.name;
-          document.getElementById("facture-formulaire").style.display = 'block';
-        })
-        .catch(err => console.error('Erreur PDF:', err));
-      }
-    });
-  </script>
 </body>
 </html>
