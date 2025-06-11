@@ -257,203 +257,192 @@ def json_visuel():
 @app.route('/analyse', methods=['GET', 'POST'])
 def analyse():
     """ Route pour analyser les factures """
+
+    # Réinitialisation des filtres si demandé
     if request.method == 'POST' and request.form.get('action') == 'reset':
         return redirect('/analyse')
+
+    # Connexion DB avec noms colonnes
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    fournisseur = request.form.get('fournisseur')
-    date_debut = request.form.get('date_debut')
-    date_fin = request.form.get('date_fin')
-    query = 'SELECT date_facture, montant_total, fournisseur FROM factures WHERE utilisateur_id = ?'
-    params = [session['utilisateur_id']]
+
+    # Lecture des filtres : fournisseur, dates, champ date sur lequel filtrer
+    fournisseur = request.values.get('fournisseur')
+    date_debut = request.values.get('date_debut')
+    date_fin = request.values.get('date_fin')
+    filtre_date = request.values.get('filtre_date') or 'date_facture'
+    utilisateur_id = session['utilisateur_id']
+
+    # Requête principale des factures filtrées selon utilisateur et filtres
+    query = f"SELECT {filtre_date} as date_val, montant_total, fournisseur FROM factures WHERE utilisateur_id = ?"
+    params = [utilisateur_id]
 
     if date_debut:
-        query += ' AND date_facture >= ?'
+        query += f" AND {filtre_date} >= ?"
         params.append(date_debut)
     if date_fin:
-        query += ' AND date_facture <= ?'
+        query += f" AND {filtre_date} <= ?"
         params.append(date_fin)
-    if fournisseur and fournisseur != 'Tous':
-        query += ' AND fournisseur = ?'
+    if fournisseur and fournisseur.lower() != 'tous':
+        query += " AND LOWER(fournisseur) = LOWER(?)"
         params.append(fournisseur)
 
     c.execute(query, params)
     donnees = c.fetchall()
 
-    dates, montants = [], []
-
-    for date_facture, montant, _ in donnees:
+    # Extraction dates et montants nettoyés (conversion string -> float)
+    dates = [row['date_val'] for row in donnees]
+    montants = []
+    for row in donnees:
         try:
-            # Nettoyage : supprimer € ou autres caractères et convertir proprement
-            montant_clean = str(montant).replace('€', '').replace(',', '.').strip()
-            montant_float = float(montant_clean)
-            dates.append(date_facture)
-            montants.append(montant_float)
-        except Exception as e:
-            print(f"Erreur montant: {montant} → {e}")
-            continue
+            montants.append(float(row['montant_total'].replace(',', '.')))
+        except Exception:
+            montants.append(0)
 
-    # Récupération de la date actuelle pour les KPI indépendants des filtres
+    # Dates utiles pour KPI (annuel et mensuel)
     today = date.today()
     debut_annee = today.replace(month=1, day=1).isoformat()
     debut_mois = today.replace(day=1).isoformat()
 
-    # Factures depuis le 1er janvier
-    c.execute('''
-        SELECT COUNT(*), SUM(REPLACE(montant_total, ",", "."))
+    # KPI annuels et mensuels (sans filtres, car ce sont des globales)
+    c.execute("""
+        SELECT COUNT(*), SUM(REPLACE(montant_total, ',', '.'))
         FROM factures
         WHERE utilisateur_id = ? AND date_facture >= ?
-    ''', (session['utilisateur_id'], debut_annee))
+    """, (utilisateur_id, debut_annee))
     nb_annee, total_annee = c.fetchone()
     total_annee = float(total_annee or 0)
 
-    # Factures depuis le 1er du mois
-    c.execute('''
-        SELECT COUNT(*), SUM(REPLACE(montant_total, ",", "."))
+    c.execute("""
+        SELECT COUNT(*), SUM(REPLACE(montant_total, ',', '.'))
         FROM factures
         WHERE utilisateur_id = ? AND date_facture >= ?
-    ''', (session['utilisateur_id'], debut_mois))
+    """, (utilisateur_id, debut_mois))
     nb_mois, total_mois = c.fetchone()
     total_mois = float(total_mois or 0)
 
-
-    c.execute('SELECT DISTINCT fournisseur FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    # Liste des fournisseurs (pour filtre)
+    c.execute("SELECT DISTINCT fournisseur FROM factures WHERE utilisateur_id = ?", (utilisateur_id,))
     fournisseurs = [row[0] for row in c.fetchall()]
 
-    query_repart = '''
-        SELECT categorie, SUM(REPLACE(montant_total, ",", "."))
+    # Répartition des montants payés par catégorie (avec filtres appliqués)
+    query_repart = """
+        SELECT categorie, SUM(REPLACE(montant_total, ',', '.'))
         FROM factures
         WHERE utilisateur_id = ? AND facture_payee = 1
-    '''
-    params_repart = [session['utilisateur_id']]
+    """
+    params_repart = [utilisateur_id]
 
     if date_debut:
-        query_repart += ' AND date_facture >= ?'
+        query_repart += f" AND {filtre_date} >= ?"
         params_repart.append(date_debut)
     if date_fin:
-        query_repart += ' AND date_facture <= ?'
+        query_repart += f" AND {filtre_date} <= ?"
         params_repart.append(date_fin)
+    if fournisseur and fournisseur.lower() != 'tous':
+        query_repart += " AND LOWER(fournisseur) = LOWER(?)"
+        params_repart.append(fournisseur)
 
-    query_repart += ' GROUP BY categorie'
+    query_repart += " GROUP BY categorie"
+
+
     c.execute(query_repart, params_repart)
-
     repartition = c.fetchall()
 
-    # Toutes les factures impayées, triées par date d'échéance -----------------
-    now = date.today().isoformat()
-
-    # Factures impayées en retard (date échéance < today)
-    c.execute('''
+    # Factures non payées : en retard et à venir (sans filtre sur dates/fournisseurs)
+    now_iso = today.isoformat()
+    c.execute("""
         SELECT id, numero_facture, date_facture, echeance, fournisseur, montant_total, TVA
         FROM factures
         WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance < ?
         ORDER BY echeance ASC
-    ''', (session['utilisateur_id'], today))
+    """, (utilisateur_id, now_iso))
     factures_en_retard = c.fetchall()
 
-    # Factures impayées à venir (date échéance >= today)
-    c.execute('''
+    c.execute("""
         SELECT id, numero_facture, date_facture, echeance, fournisseur, montant_total, TVA
         FROM factures
         WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance >= ?
         ORDER BY echeance ASC
-    ''', (session['utilisateur_id'], now))
+    """, (utilisateur_id, now_iso))
     factures_a_venir = c.fetchall()
 
-    # Concaténation des listes pour afficher dans le même tableau, triées par date d'échéance
     paiements_avenir = factures_en_retard + factures_a_venir
 
-    # Conversion des dates en string ISO (par sécurité)
+    # Conversion de la date échéance en string pour l'affichage
     for f in paiements_avenir:
-        if not isinstance(f['echeance'], str):
-            f['echeance'] = f['echeance'].isoformat() if hasattr(f['echeance'], 'isoformat') else str(f['echeance'])
+        echeance = f['echeance']
+        if not isinstance(echeance, str):
+            f['echeance'] = echeance.isoformat() if hasattr(echeance, 'isoformat') else str(echeance)
 
-
-    # Cumul à l’échéance selon paiement -----------------------------------
-
-   query_echeance = '''
-        SELECT echeance, REPLACE(montant_total, ",", "."), facture_payee
+    # Cumul des montants par échéance, séparés payés / impayés (avec filtres)
+    query_cumul = """
+        SELECT echeance, REPLACE(montant_total, ',', '.'), facture_payee
         FROM factures
         WHERE utilisateur_id = ?
-    '''
-    params_echeance = [session['utilisateur_id']]
-
+    """
+    params_cumul = [utilisateur_id]
     if date_debut:
-        query_echeance += ' AND echeance >= ?'
-        params_echeance.append(date_debut)
+        query_cumul += " AND echeance >= ?"
+        params_cumul.append(date_debut)
     if date_fin:
-        query_echeance += ' AND echeance <= ?'
-        params_echeance.append(date_fin)
-    if fournisseur and fournisseur != 'Tous':
-        query_echeance += ' AND fournisseur = ?'
-        params_echeance.append(fournisseur)
+        query_cumul += " AND echeance <= ?"
+        params_cumul.append(date_fin)
+    if fournisseur and fournisseur.lower() != 'tous':
+        query_cumul += " AND LOWER(fournisseur) = LOWER(?)"
+        params_cumul.append(fournisseur)
 
-    c.execute(query_echeance, params_echeance)
-    factures_brutes = c.fetchall()
+    c.execute(query_cumul, params_cumul)
+    factures_cumul = c.fetchall()
 
     factures_payees = []
     factures_impayees = []
 
-    for echeance, montant_str, payee in factures_brutes:
-        try:
-            montant = float(str(montant_str).replace('€', '').replace(',', '.').strip())
-            if payee == 1:
-                factures_payees.append((echeance, montant))
-            else:
-                factures_impayees.append((echeance, montant))
-        except Exception as e:
-            print(f"Erreur montant: {montant_str} → {e}")
-            continue
+    for echeance, montant_str, payee in factures_cumul:
+        montant = float(montant_str)
+        if payee == 1:
+            factures_payees.append((echeance, montant))
+        else:
+            factures_impayees.append((echeance, montant))
 
-    # --- Construction d'une timeline unique triée ---
-    all_dates = set([f[0] for f in factures_payees + factures_impayees])
-    all_dates = sorted(all_dates, key=lambda d: datetime.strptime(d, "%Y-%m-%d"))
-
-    # Dictionnaires pour regrouper les montants par date
+    # Trie et cumul des montants par date d'échéance
+    all_dates = sorted(set([f[0] for f in factures_payees + factures_impayees]), key=lambda d: datetime.strptime(d, "%Y-%m-%d"))
     cumul_payees_dict = defaultdict(float)
     cumul_impayees_dict = defaultdict(float)
 
-    for date_str, montant in factures_payees:
-        cumul_payees_dict[date_str] += montant
+    for d, m in factures_payees:
+        cumul_payees_dict[d] += m
+    for d, m in factures_impayees:
+        cumul_impayees_dict[d] += m
 
-    for date_str, montant in factures_impayees:
-        cumul_impayees_dict[date_str] += montant
+    labels, cumul_payees, cumul_impayees = [], [], []
+    total_payees, total_impayees = 0, 0
 
-    # Courbes cumulées sur une même ligne de temps
-    labels = []
-    cumul_payees = []
-    cumul_impayees = []
-
-    total_payees = 0
-    total_impayees = 0
-
-    for date_str in all_dates:
-        labels.append(date_str)
-        total_payees += cumul_payees_dict[date_str]
-        total_impayees += cumul_impayees_dict[date_str]
+    for d in all_dates:
+        labels.append(d)
+        total_payees += cumul_payees_dict[d]
+        total_impayees += cumul_impayees_dict[d]
         cumul_payees.append(round(total_payees, 2))
-        cumul_impayees.append(round(total_payees + total_impayees, 2))  # global avec impayés
-
-
-    # Fin ajout cumul échéance -----------------------------------
+        cumul_impayees.append(round(total_payees + total_impayees, 2))
 
     conn.close()
 
-    # Tri des dates et montants
+    # Tri des dates/montants pour graphique d’évolution (filtrés)
     try:
         combined = sorted(zip(dates, montants), key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
         dates, montants = zip(*combined) if combined else ([], [])
     except Exception as e:
         print(f"Erreur tri des dates : {e}")
 
-    # Calcul du cumul
+    # Calcul cumulatif montant total (évolution)
     montants_cumul = []
     total = 0
-    for montant in montants:
-        total += montant
+    for m in montants:
+        total += m
         montants_cumul.append(total)
 
+    # Rendu template avec toutes les données
     return render_template('analyse.html',
         dates=dates,
         montants=montants,
@@ -464,6 +453,7 @@ def analyse():
         montants_categories=[float(r[1]) for r in repartition],
         date_debut=date_debut,
         date_fin=date_fin,
+        filtre_date=filtre_date,
         total_annee=total_annee,
         nb_annee=nb_annee,
         total_mois=total_mois,
@@ -472,11 +462,13 @@ def analyse():
         paiements_avenir=paiements_avenir,
         factures_en_retard=factures_en_retard,
         factures_a_venir=factures_a_venir,
-        now=now,
+        now=now_iso,
         labels=labels,
         cumul_payees=cumul_payees,
         cumul_impayees=cumul_impayees,
     )
+
+
 
 @app.route('/export_csv', methods=['POST'])
 def export_csv():
