@@ -40,11 +40,74 @@ def verifier_connexion():
 
 @app.route('/')
 def accueil():
-    """Route principale de l'application.Cette route redirige vers la page de connexion
-    si l'utilisateur n'est pas connecté."""
+    """Route principale de l'application : page d'accueil avec KPI si connecté"""
     if 'utilisateur_id' not in session:
         return redirect(url_for('login'))
-    return render_template('index.html')
+
+    utilisateur_id = session['utilisateur_id']
+    conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+
+    # Dates utiles
+    today = date.today()
+    debut_annee = today.replace(month=1, day=1).isoformat()
+    debut_mois = today.replace(day=1).isoformat()
+
+    # KPI 1 : Total montant année + mois
+    c.execute("""
+        SELECT SUM(REPLACE(montant_total, ',', '.')) FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    """, (utilisateur_id, debut_annee))
+    total_annee = float(c.fetchone()[0] or 0)
+
+    c.execute("""
+        SELECT SUM(REPLACE(montant_total, ',', '.')) FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    """, (utilisateur_id, debut_mois))
+    total_mois = float(c.fetchone()[0] or 0)
+
+    # KPI 2 : Nombre de factures année + mois
+    c.execute("""
+        SELECT COUNT(*) FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    """, (utilisateur_id, debut_annee))
+    nb_annee = c.fetchone()[0]
+
+    c.execute("""
+        SELECT COUNT(*) FROM factures
+        WHERE utilisateur_id = ? AND date_facture >= ?
+    """, (utilisateur_id, debut_mois))
+    nb_mois = c.fetchone()[0]
+
+    # KPI 3 : Factures non payées (en retard / à venir)
+    now_iso = today.isoformat()
+
+    c.execute("""
+        SELECT id FROM factures
+        WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance < ?
+    """, (utilisateur_id, now_iso))
+    factures_en_retard = c.fetchall()
+
+    c.execute("""
+        SELECT id FROM factures
+        WHERE utilisateur_id = ? AND facture_payee = 0 AND echeance >= ?
+    """, (utilisateur_id, now_iso))
+    factures_a_venir = c.fetchall()
+
+    conn.close()
+
+    return render_template('index.html',
+        total_annee=total_annee,
+        total_mois=total_mois,
+        nb_annee=nb_annee,
+        nb_mois=nb_mois,
+        factures_en_retard=factures_en_retard,
+        factures_a_venir=factures_a_venir
+    )
+
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

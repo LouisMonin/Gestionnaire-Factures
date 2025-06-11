@@ -147,25 +147,6 @@
     </form>
 
 
-        <!-- <div class="kpi-cards">
-            <div class="kpi">
-                <h3>Total facturé</h3>
-                <p>{{ "{:.2f}".format(montants | sum | float) }} €</p>
-            </div>
-            <div class="kpi">
-                <h3>Nombre de factures</h3>
-                <p>{{ montants | length }}</p>
-            </div>
-            <div class="kpi">
-                <h3>Fournisseur principal</h3>
-                <p>{{ fournisseurs_repart[0] if fournisseurs_repart else "N/A" }}</p>
-            </div>
-            <div class="kpi">
-                <h3>Montant moyen</h3>
-                <p>{{ "{:.2f}".format((montants | sum) / (montants | length)) if montants else "0.00" }} €</p>
-            </div>
-        </div> -->
-
 
         <div class="chart-wrapper">
             <canvas id="evolutionChart"></canvas>
