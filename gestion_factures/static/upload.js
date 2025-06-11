@@ -13,30 +13,50 @@ document.getElementById('facture').addEventListener('change', function () {
 
   // 🔍 Cas PDF : envoi vers Flask
   if (extension === 'pdf') {
-    const formData = new FormData();
-    formData.append('facture_pdf', file);
+  const formData = new FormData();
+  formData.append('facture_pdf', file);
 
-    fetch('/analyse_pdf', {
-      method: 'POST',
-      body: formData
-    })
-    .then(r => r.json())
-    .then(data => {
-      document.getElementById("nom_entreprise").value = data.fournisseur || '';
-      document.getElementById("date_facture").value = data.date_facture || '';
-      document.getElementById("numero_facture").value = data.numero_facture || '';
-      document.getElementById("total_ttc").value = data.montant_total || '';
-      document.getElementById("tva").value = data.TVA || '';
-      document.getElementById("nom_fichier").value = file.name;
-      form.style.display = 'block';
-    })
-    .catch(err => {
-      console.error('Erreur PDF:', err);
-      alert("❌ Erreur lors de l'analyse du fichier PDF.");
-    });
+  fetch('/analyse_pdf', {
+    method: 'POST',
+    body: formData
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("nom_entreprise").value = data.fournisseur || '';
+document.getElementById("numero_facture").value = data.numero_facture || '';
+document.getElementById("date_facture").value = data.date_facture || '';
+document.getElementById("echeance").value = data.echeance || '';
+document.getElementById("total_ht").value = data.total_ht || '';
+document.getElementById("tva").value = data.TVA || '';
+document.getElementById("total_ttc").value = data.montant_total || '';
+document.getElementById("nom_fichier").value = file.name;
 
-    return;
-  }
+    form.style.display = 'block';
+
+    // 👇 AFFICHAGE DU PDF EN IFRAME
+    const url = URL.createObjectURL(file);
+preview.innerHTML = `
+  <iframe
+    src="${url}"
+    style="
+      width: 100%;
+      height: 85vh;
+      border: none;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 12px;
+    ">
+  </iframe>`;
+preview.style.display = 'block';
+
+  })
+  .catch(err => {
+    console.error('Erreur PDF:', err);
+    alert("❌ Erreur lors de l'analyse du fichier PDF.");
+  });
+
+  return;
+}
+
 
   // 🔍 Cas Excel / CSV
   const reader = new FileReader();

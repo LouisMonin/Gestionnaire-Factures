@@ -536,19 +536,47 @@ def ocr_core(fichier):
     return pytesseract.image_to_string(Image.open(fichier))
 
 def extraire_infos(texte):
-    """ Fonction pour extraire les informations d'une facture à partir du texte OCR """
-    date = re.search(r'(\d{2}/\d{2}/\d{4})', texte)
-    numero = re.search(r'(?:Facture|N\u00b0|No|Num\u00e9ro)[^\d]*(\d+)', texte, re.I)
-    montant = re.search(r'(\d+[.,]\d{2}) ?(?:\u20ac|EUR)', texte)
-    tva = re.search(r'TVA[^\d]*(\d+[.,]\d{2})', texte, re.I)
-    fournisseur = texte.strip().split('\n')[0]
+    import re
+    from datetime import datetime
+
+    def clean_num(s):
+        return re.sub(r"[^\d,.\-]", "", s).replace(",", ".").strip()
+
+    def extract_date(text):
+        match = re.search(r'(\d{1,2}/\d{1,2}/\d{2,4})', text)
+        if match:
+            d, m, y = match.group(1).split('/')
+            y = '20' + y if len(y) == 2 else y
+            return f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+        return ""
+
+    def extract_first_matching(label_keywords, lines, as_date=False):
+        for line in lines:
+            for keyword in label_keywords:
+                if keyword.lower() in line.lower():
+                    if as_date:
+                        return extract_date(line)
+                    else:
+                        match = re.search(r'[:\-]?\s*([€\d][\d\s,.]*)', line)
+                        if match:
+                            return clean_num(match.group(1))
+        return ""
+
+    lines = [l.strip() for l in texte.split('\n') if l.strip()]
+
     return {
-        "fournisseur": fournisseur if fournisseur else "Non trouv\u00e9",
-        "date_facture": date.group(1) if date else "Non trouv\u00e9e",
-        "numero_facture": numero.group(1) if numero else "Non trouv\u00e9",
-        "montant_total": montant.group(1) if montant else "Non trouv\u00e9",
-        "TVA": tva.group(1) if tva else "Non trouv\u00e9e"
+        "fournisseur": next((l for l in lines if "nom entreprise" in l.lower()), lines[0]),
+        "numero_facture": extract_first_matching(["numéro de facture", "n° de facture"], lines),
+        "date_facture": extract_first_matching(["date de facture"], lines, as_date=True),
+        "echeance": extract_first_matching(["échéance de paiement", "échéance"], lines, as_date=True),
+        "total_ht": extract_first_matching(["sous-total", "total ht", "prix total ht"], lines),
+        "TVA": extract_first_matching(["tva", "taux de tva"], lines),
+        "montant_total": extract_first_matching(["total ttc"], lines),
+        "somme_finale": extract_first_matching(["somme finale"], lines)
     }
+
+
+
 
 if __name__ == "__main__":
     import webbrowser
