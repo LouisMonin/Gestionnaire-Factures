@@ -691,10 +691,10 @@ def extraire_infos(texte):
         "numero_facture": extract_first_matching(["numéro de facture", "n° de facture"], lines),
         "date_facture": extract_first_matching(["date de facture"], lines, as_date=True),
         "echeance": extract_first_matching(["échéance de paiement", "échéance"], lines, as_date=True),
-        "total_ht": extract_first_matching(["sous-total", "total ht", "prix total ht"], lines),
+        "total_ht1": extract_first_matching(["sous-total", "total ht", "prix total ht"], lines),
         "TVA": extract_first_matching(["tva", "taux de tva"], lines),
         "montant_total": extract_first_matching(["total ttc"], lines),
-        "somme_finale": extract_first_matching(["somme finale"], lines)
+        "total_ht": extract_first_matching(["total ht"], lines)
     }
 
 @app.route('/analyse_image', methods=['POST'])

@@ -36,7 +36,7 @@
                 <th>Date facture</th>
                 <th>Échéance</th>
                 <th>TVA</th>
-                <th> Total HT</th>
+                <th>Total HT</th>
                 <th>Total TTC</th>
                 <th>Payée <br>
                   <div class="filter-group" style="display:none;">
@@ -83,7 +83,7 @@
                 <td>{{ f['date_facture'] }}</td>
                 <td>{{ f['echeance'] }}</td>
                 <td>{{ f['TVA'] }} %</td>
-                <td>{{ f['total_ht'] }} €</td>
+                <td>{{ f['somme_finale'] }} €</td>
                 <td>{{ f['montant_total'] }} €</td>
                 <td>
                     <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
