@@ -19,8 +19,9 @@ import csv
 import io
 from pdf2image import convert_from_path
 import pandas as pd
-from datetime import datetime, date
+from datetime import datetime,date
 from collections import defaultdict
+import calendar
 
 
 """ Configuration de l'application Flask """
@@ -489,8 +490,6 @@ def analyse():
         cumul_payees.append(round(total_payees, 2))
         cumul_impayees.append(round(total_payees + total_impayees, 2))
 
-    conn.close()
-
     # Tri des dates/montants pour graphique d’évolution (filtrés)
     try:
         combined = sorted(zip(dates, montants), key=lambda x: datetime.strptime(x[0], "%Y-%m-%d"))
@@ -504,6 +503,60 @@ def analyse():
     for m in montants:
         total += m
         montants_cumul.append(total)
+
+
+    # HISTOGRAMME : répartition des montants par catégorie
+
+    # Récupération des factures payées (avec filtres)
+    query_histogramme = """
+        SELECT date_facture, montant_total, categorie
+        FROM factures
+        WHERE utilisateur_id = ? AND facture_payee = 1
+    """
+    params_histogramme = [utilisateur_id]
+
+    if date_debut:
+        query_histogramme += f" AND {filtre_date} >= ?"
+        params_histogramme.append(date_debut)
+    if date_fin:
+        query_histogramme += f" AND {filtre_date} <= ?"
+        params_histogramme.append(date_fin)
+    if fournisseur and fournisseur.lower() != 'tous':
+        query_histogramme += " AND LOWER(fournisseur) = LOWER(?)"
+        params_histogramme.append(fournisseur)
+
+    c.execute(query_histogramme, params_histogramme)
+    factures_payees = c.fetchall()
+
+    conn.close()
+
+    # Regrouper par mois et catégorie
+    data_mensuelle = defaultdict(lambda: defaultdict(float))
+
+    for f in factures_payees:
+        date_str = f["date_facture"]
+        try:
+            date_f = datetime.strptime(date_str, "%Y-%m-%d")  # ou adapte le format
+            mois = date_f.strftime("%Y-%m")
+        except Exception as e:
+            print(f"Erreur conversion date_facture : {e}")
+            continue
+        categorie = f["categorie"] if "categorie" in f.keys() else "Autre"
+        data_mensuelle[mois][categorie] += float(f["montant_total"])
+
+    # Organiser les données pour Chart.js
+    mois_tries = sorted(data_mensuelle.keys())
+    categories_uniques = sorted({cat for mois in data_mensuelle.values() for cat in mois})
+
+    # Création des datasets
+    stacked_data = []
+    for cat in categories_uniques:
+        values = [data_mensuelle[mois].get(cat, 0) for mois in mois_tries]
+        stacked_data.append({
+            "label": cat,
+            "data": values
+        })
+
 
     # Rendu template avec toutes les données
     return render_template('analyse.html',
@@ -529,6 +582,8 @@ def analyse():
         labels=labels,
         cumul_payees=cumul_payees,
         cumul_impayees=cumul_impayees,
+        labels_mois=mois_tries,
+        stacked_datasets=stacked_data,
     )
 
 

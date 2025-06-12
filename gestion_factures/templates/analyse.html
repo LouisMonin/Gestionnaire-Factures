@@ -156,6 +156,10 @@
             <canvas id="pieChart"></canvas>
         </div>
 
+        <div class="chart-wrapper">
+            <canvas id="barChart"></canvas>
+        </div>
+
         <div style="text-align:center">
             <button onclick="exportCharts()" class="button">📷 Télécharger les graphiques</button>
         </div>
@@ -201,7 +205,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Évolution cumulative des factures payées et prévisionnelles',
+                        text: 'Évolution cumulative des factures payées et prévisionnelles à date d\'échéance',
                         font: {
                             size: 18,
                             weight: 'bold'
@@ -266,7 +270,7 @@
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Répartition des dépenses par catégorie',
+                        text: 'Répartition des factures payées par catégorie',
                         font: {
                             size: 18,
                             weight: 'bold'
@@ -286,6 +290,55 @@
                     tooltip: {
                         callbacks: {
                             label: ctx => `${ctx.label}: €${ctx.raw.toFixed(2)}`
+                        }
+                    }
+                }
+            }
+        });
+
+
+        const barCtx = document.getElementById('barChart');
+
+        new Chart(barCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ labels_mois | tojson | safe }},
+                datasets: {{ stacked_datasets | tojson | safe }}.map((dataset, index) => ({
+                    ...dataset,
+                    backgroundColor: [
+                        '#007BFF', '#6c757d', '#17a2b8', '#28a745', '#ffc107', '#dc3545'
+                    ][index % 6],
+                    stack: 'montants'
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Montants mensuels des factures payées par catégorie',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: { top: 10, bottom: 30 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `${ctx.dataset.label}: €${ctx.raw.toFixed(2)}`
+                        }
+                    },
+                    legend: { position: 'bottom' }
+                },
+                scales: {
+                    x: { stacked: true, ticks: { color: '#444' } },
+                    y: {
+                        stacked: true,
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#444',
+                            callback: value => '€' + value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
                         }
                     }
                 }
