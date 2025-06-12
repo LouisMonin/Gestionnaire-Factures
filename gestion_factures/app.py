@@ -188,7 +188,6 @@ def upload():
         total_ht = request.form.get("total_ht")
         tva = request.form.get("tva")
         total_ttc = request.form.get("total_ttc")
-        somme_finale = request.form.get("somme_finale")
 
         # Récupération de la catégorie depuis le formulaire
         categorie = request.form.get("categorie", "Non-catégorisée")
@@ -208,7 +207,7 @@ def upload():
             facture_payee,
             numero_client,
             echeance,
-            somme_finale,
+            total_ht,
             categorie  # Ajout du paramètre catégorie
         )
 
