@@ -95,7 +95,6 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
 }
 
 
-
   // 🔍 Cas Excel / CSV
   const reader = new FileReader();
   reader.onload = function (e) {
@@ -267,30 +266,38 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
 
 // ✅ Validation des dates
 function validateDates() {
-  const dateFacture = document.getElementById('date_facture');
-  const dateEcheance = document.getElementById('echeance');
-  const today = new Date().toISOString().split('T')[0];
+  const dateFactureEl = document.getElementById('date_facture');
+  const dateEcheanceEl = document.getElementById('echeance');
+  const today = new Date();
+  let valid = true;
 
-  if (dateFacture.value && dateFacture.value > today) {
-    dateFacture.style.backgroundColor = '#ffdddd';
-    showDateError(dateFacture, '❌ La date doit être antérieure ou égale à aujourd\'hui');
-    return false;
+  const factureDate = dateFactureEl.value ? new Date(dateFactureEl.value) : null;
+  const echeanceDate = dateEcheanceEl.value ? new Date(dateEcheanceEl.value) : null;
+
+  if (factureDate && factureDate > today) {
+    dateFactureEl.style.backgroundColor = '#ffdddd';
+    showDateError(dateFactureEl, '❌ La date de facture ne peut pas être dans le futur');
+    valid = false;
   } else {
-    dateFacture.style.backgroundColor = '';
-    hideDateError(dateFacture);
+    dateFactureEl.style.backgroundColor = '';
+    hideDateError(dateFactureEl);
   }
 
-  if (dateFacture.value && dateEcheance.value && dateEcheance.value < dateFacture.value) {
-    dateEcheance.style.backgroundColor = '#ffdddd';
-    showDateError(dateEcheance, '❌ La date d\'échéance doit être postérieure à la date de facture');
-    return false;
+  if (factureDate && echeanceDate && echeanceDate < factureDate) {
+    dateEcheanceEl.style.backgroundColor = '#ffdddd';
+    showDateError(dateEcheanceEl, '❌ L\'échéance doit être postérieure ou égale à la date de facture');
+    valid = false;
   } else {
-    dateEcheance.style.backgroundColor = '';
-    hideDateError(dateEcheance);
+    dateEcheanceEl.style.backgroundColor = '';
+    hideDateError(dateEcheanceEl);
   }
 
-  return true;
+  return valid;
 }
+
+
+
+
 
 function validateMontants() {
   const ht = parseFloat(document.getElementById('total_ht').value);
@@ -352,18 +359,7 @@ document.getElementById('facture-formulaire').addEventListener('submit', functio
   const validDates = validateDates();
   const validMontants = validateMontants();
 
-  if (!validDates || !validMontants) {
-    e.preventDefault(); // ❌ Bloque l'envoi
-    alert("⚠️ Veuillez corriger les erreurs avant de valider la facture.");
-  }
-});
-
-document.getElementById('facture-formulaire').addEventListener('submit', function (e) {
-  const validDates = validateDates();
-  const validMontants = validateMontants();
-
-  // Vérifie que les champs requis sont remplis
-  const champsObligatoires = ['nom_entreprise','date_facture', 'echeance', 'total_ttc', 'tva', 'total_ht'];
+  const champsObligatoires = ['nom_entreprise', 'date_facture', 'echeance', 'total_ttc', 'tva', 'total_ht'];
   let champsOk = true;
 
   champsObligatoires.forEach(id => {
@@ -391,10 +387,12 @@ document.getElementById('facture-formulaire').addEventListener('submit', functio
   });
 
   if (!validDates || !validMontants || !champsOk) {
-    e.preventDefault(); // ❌ Bloque la soumission
-    alert("⚠️ Veuillez corriger les erreurs ou remplir tous les champs obligatoires.");
+    e.preventDefault();
+    alert("⚠️ Veuillez corriger les erreurs avant de soumettre le formulaire.");
   }
 });
+
+
 
 document.getElementById('facture').addEventListener('change', function () {
       const file = this.files[0];
