@@ -8,7 +8,7 @@
 # Il nécessite les bibliothèques Flask, SQLite, pytesseract, PIL (Pillow), pdf2image et pandas.
 # """
 
-from flask import Flask, jsonify, render_template, request, redirect, flash, url_for, session, make_response
+from flask import Flask, jsonify, render_template, request, redirect, flash, url_for, session, make_response, send_from_directory
 from database import init_db, insert_facture, ajouter_utilisateur, verifier_utilisateur
 import os
 import pytesseract
