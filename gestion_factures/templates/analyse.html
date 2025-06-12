@@ -51,9 +51,9 @@
 
         <div id="impayeesSection" style="display: none;">
             <div class="table-wrapper">
-                <h2 class="text-xl font-semibold text-gray-700 mb-2">Factures impayées (toutes échéances)</h2>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">Factures impayées </h2>
                 <div class="mb-2 flex items-center space-x-2">
-                    <span style="display:inline-block; width:25px; height:16px; background-color:#f8d7da; border:1px solid #721c24; border-radius:4px;">&nbsp;</span>
+                    <span style="display:inline-block; width:25px; height:16px; background-color:#f8d7da; border:1px solid #721c24; border-radius:4px;"></span>
                     <span class="text-sm text-gray-700"> Factures en retard</span>
                 </div>
                 {% if paiements_avenir %}
@@ -63,8 +63,8 @@
                                 <tr>
                                     <th class="px-4 py-2">Fournisseur</th>
                                     <th class="px-4 py-2">Date facture</th>
-                                    <th class="px-4 py-2">Échéance</th>  <!-- Nouvelle colonne -->
-                                    <th class="px-4 py-2">Numéro</th>
+                                    <th class="px-4 py-2">Échéance</th>
+                                    <th class="px-4 py-2">Libellé</th>
                                     <th class="px-4 py-2">Montant</th>
                                     <th class="px-4 py-2">TVA</th>
                                 </tr>
@@ -77,7 +77,7 @@
                                 <td class="px-4 py-2">{{ facture['date_facture'] }}</td>
                                 <td class="px-4 py-2">{{ facture['echeance'] }}</td>
                                 <td class="px-4 py-2">{{ facture['numero_facture'] }}</td>
-                                <td class="px-4 py-2">{{ facture['montant_total'] }} €</td>
+                                <td class="px-4 py-2">{{ "{:,.2f}".format(facture['montant_total']|float).replace(',', ' ')}} €</td>
                                 <td class="px-4 py-2">{{ facture['TVA'] }} %</td>
                                 </tr>
                             {% endfor %}
@@ -183,7 +183,7 @@
                         fill: true
                     },
                     {
-                        label: 'Prévisionnel avec les factures impayées',
+                        label: 'Cumul avec les factures impayées',
                         data: {{ cumul_impayees | tojson | safe }},
                         borderColor: 'rgba(255,165,0,1)',
                         backgroundColor: 'rgba(255,165,0,0.2)',
@@ -199,6 +199,18 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Évolution cumulative des factures payées et prévisionnelles',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 30
+                        }
+                    },
                     legend: { display: true },
                     tooltip: {
                         callbacks: {
@@ -252,6 +264,18 @@
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
+                    title: {
+                        display: true,
+                        text: 'Répartition des dépenses par catégorie',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: {
+                            top: 10,
+                            bottom: 20
+                        }
+                    },
                     legend: {
                         position: 'bottom',
                         labels: {
