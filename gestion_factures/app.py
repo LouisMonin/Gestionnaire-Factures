@@ -299,8 +299,7 @@ def factures_json():
     factures = c.fetchall()
     conn.close()
     return jsonify([{
-        "id": f['id'], "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "numero_facture": f['numero_facture'],
-        "montant_total": f['montant_total'], "TVA": f['TVA']
+        "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "echeance": f['echeance'], "TVA": f['TVA'], "montant_total": f['montant_total']
     } for f in factures])
 
 @app.route('/factures/json/page')
@@ -313,8 +312,7 @@ def json_visuel():
     factures = c.fetchall()
     conn.close()
     return render_template("factures_json.html", factures=[{
-        "id": f['id'], "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "numero_facture": f['numero_facture'],
-        "montant_total": f['montant_total'], "TVA": f['TVA']
+        "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "echeance": f['echeance'], "TVA": f['TVA'], "montant_total": f['montant_total']
     } for f in factures])
 
 @app.route('/analyse', methods=['GET', 'POST'])
