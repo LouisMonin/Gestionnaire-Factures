@@ -1433,3 +1433,153 @@ button.full {
 .standard-btn:hover {
   background-color: #e6e6e6;
 }
+
+/* ✅ Filtre sous titre : centrage propre et look moderne */
+#table-factures th {
+  text-align: center;
+  vertical-align: middle;
+  padding: 12px 8px;
+  white-space: nowrap;
+}
+
+#table-factures .filter-group {
+  margin-top: 6px;
+}
+
+#table-factures .filter-group input,
+#table-factures .filter-group select {
+  width: 90%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9em;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#table-factures .filter-group input:focus,
+#table-factures .filter-group select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px #007bff55;
+  outline: none;
+}
+
+/* ✅ Boutons : style homogène et doux */
+.standard-btn {
+  padding: 8px 18px;
+  background: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-right: 8px;
+  font-size: 0.95em;
+  transition: background 0.3s;
+}
+
+.standard-btn:hover {
+  background: #0056b3;
+}
+
+.danger {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.danger:hover {
+  background: #b02a37;
+}
+
+/* ✅ Tableau : lignes plus aérées */
+#table-factures td,
+#table-factures th {
+  border: 1px solid #ddd;
+}
+
+#table-factures {
+  border-collapse: collapse;
+  margin: 0 auto;
+  width: auto; /* laisse la largeur auto pour ajuster */
+}
+
+#table-factures tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+#table-factures tr:hover {
+  background: #f1f1f1;
+}
+
+#table-factures thead {
+  background: #f5f5f5;
+}
+
+/* ✅ Force une seule ligne pour toutes les cellules et en-têtes */
+#table-factures th,
+#table-factures td {
+  white-space: nowrap;
+}
+
+/* ✅ Style unifié pour tous les inputs et select y compris "Payée" */
+#table-factures .filter-group input,
+#table-factures .filter-group select,
+#filter-paid {
+  width: 90%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9em;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#table-factures .filter-group input:focus,
+#table-factures .filter-group select:focus,
+#filter-paid:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px #007bff55;
+  outline: none;
+}
+
+/* ✅ Corrige l'affichage du select Payée : centre et margin top */
+#filter-paid {
+  margin-top: 6px;
+  display: block; /* force qu'il se comporte comme un input */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#table-factures .filter-group input,
+#table-factures .filter-group select {
+  width: 90%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 0.9em;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#table-factures .filter-group input:focus,
+#table-factures .filter-group select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px #007bff55;
+  outline: none;
+}
+
+#table-factures {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  border-collapse: collapse;
+}
+
+#table-factures th:nth-child(9),
+#table-factures td:nth-child(9) {
+  min-width: 100px;
+}
