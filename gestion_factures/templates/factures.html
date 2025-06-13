@@ -15,8 +15,13 @@
     <div class="container">
         <h1>Liste des factures</h1>
 
-        <button type="button" onclick="location.reload();">Réinitialiser les filtres</button>
-        <input type="checkbox" id="toggle-filters"> Afficher les filtres
+        <button type="button" id="reset-filters-btn" class="standard-btn">Réinitialiser les filtres</button>
+
+<button id="toggle-filters-btn" class="standard-btn">Afficher les filtres</button>
+
+
+
+
 
 
         <table id = "table-factures">
@@ -52,7 +57,7 @@
                 <th>
                   Catégorisation <br>
                   <div class="filter-group" style="display:none;">
-                  <select class="filter-input" data-col="8" style="text-align: center; text-align-last: center;">
+                  <select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
                     <option value="">Toutes</option> <!-- Option vide pour ne pas filtrer -->
                     {% for cat in categories %}
                       <option value="{{ cat }}">{{ cat }}</option>
@@ -114,8 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
   const table = document.getElementById('table-factures');
   const paidFilter = document.getElementById('filter-paid');
   const textFilters = document.querySelectorAll('.filter-input');
-  const toggle = document.getElementById('toggle-filters');
+  const toggleBtn = document.getElementById('toggle-filters-btn');
+  const resetBtn = document.getElementById('reset-filters-btn');
   const filterGroups = document.querySelectorAll('.filter-group');
+
   const rowsPerPage = 10;
   let currentPage = 1;
 
@@ -192,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function () {
     renderPagination(filteredRows);
   }
 
-  // Pagination navigation
+  // Navigation pagination
   prevBtn.addEventListener('click', () => {
     currentPage--;
     updateTable();
@@ -203,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateTable();
   });
 
-  // Filtres
+  // Mise à jour sur saisie des filtres
   textFilters.forEach(input => input.addEventListener('input', () => {
     currentPage = 1;
     updateTable();
@@ -214,14 +221,29 @@ document.addEventListener('DOMContentLoaded', function () {
     updateTable();
   });
 
-  toggle.addEventListener('change', function () {
+  // Bouton toggle affichage filtres
+  toggleBtn.addEventListener('click', function () {
+    const isVisible = this.classList.toggle('active');
     filterGroups.forEach(group => {
-      group.style.display = this.checked ? 'block' : 'none';
+      group.style.display = isVisible ? 'block' : 'none';
     });
+    this.textContent = isVisible ? 'Masquer les filtres' : 'Afficher les filtres';
   });
 
-  updateTable(); // initial
+  // Bouton Réinitialiser les filtres
+  resetBtn.addEventListener('click', () => {
+    textFilters.forEach(input => input.value = '');
+    paidFilter.value = 'toutes';
+    currentPage = 1;
+    updateTable();
+  });
+
+  // Initialisation
+  updateTable();
 });
+
+
+
 </script>
 
 
