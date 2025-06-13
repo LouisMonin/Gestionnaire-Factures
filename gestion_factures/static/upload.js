@@ -1,109 +1,114 @@
+// Écouteur principal : quand l'utilisateur sélectionne un fichier
 document.getElementById('facture').addEventListener('change', function () {
-  const file = this.files[0];
-  const form = document.getElementById('facture-formulaire');
-  const preview = document.getElementById('preview');
+  const file = this.files[0]; // Récupère le fichier importé
+  const form = document.getElementById('facture-formulaire'); // Le formulaire de saisie
+  const preview = document.getElementById('preview'); // Zone d'aperçu du fichier
 
+  // Nettoyage des affichages précédents
   preview.innerHTML = '';
   preview.style.display = 'none';
   form.style.display = 'none';
 
-  if (!file) return;
+  if (!file) return; // Si aucun fichier sélectionné, on arrête là
 
-  const extension = file.name.split('.').pop().toLowerCase();
+  const extension = file.name.split('.').pop().toLowerCase(); // Extension du fichier
 
-  // 🔍 Cas PDF : envoi vers Flask
+  // ===========================
+  // CAS PDF
+  // ===========================
   if (extension === 'pdf') {
-  const formData = new FormData();
-  formData.append('facture_pdf', file);
+    const formData = new FormData();
+    formData.append('facture_pdf', file); // Envoie du fichier PDF au backend
 
-  fetch('/analyse_pdf', {
-    method: 'POST',
-    body: formData
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById("nom_entreprise").value = data.fournisseur || '';
-document.getElementById("numero_facture").value = data.numero_facture || '';
-document.getElementById("date_facture").value = data.date_facture || '';
-document.getElementById("echeance").value = data.echeance || '';
-document.getElementById("total_ht").value = data.total_ht || '';
-document.getElementById("tva").value = data.TVA || '';
-document.getElementById("total_ttc").value = data.montant_total || '';
-document.getElementById("nom_fichier").value = file.name;
+    fetch('/analyse_pdf', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      // Remplissage automatique des champs du formulaire
+      document.getElementById("nom_entreprise").value = data.fournisseur || '';
+      document.getElementById("numero_facture").value = data.numero_facture || '';
+      document.getElementById("date_facture").value = data.date_facture || '';
+      document.getElementById("echeance").value = data.echeance || '';
+      document.getElementById("total_ht").value = data.total_ht || '';
+      document.getElementById("tva").value = data.TVA || '';
+      document.getElementById("total_ttc").value = data.montant_total || '';
+      document.getElementById("nom_fichier").value = file.name;
 
-    form.style.display = 'block';
+      form.style.display = 'block'; // Affiche le formulaire avec les champs remplis
 
-    // 👇 AFFICHAGE DU PDF EN IFRAME
-    const url = URL.createObjectURL(file);
-preview.innerHTML = `
-  <iframe
-    src="${url}"
-    style="
-      width: 100%;
-      height: 85vh;
-      border: none;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      border-radius: 12px;
-    ">
-  </iframe>`;
-preview.style.display = 'block';
+      // Affiche le PDF dans un <iframe>
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = `
+        <iframe
+          src="${url}"
+          style="width: 100%; height: 85vh; border: none; box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 12px;">
+        </iframe>`;
+      preview.style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Erreur PDF:', err); // Affiche l'erreur en console
+      alert("❌ Erreur lors de l'analyse du fichier PDF."); // Alerte utilisateur
+    });
 
-  })
-  .catch(err => {
-    console.error('Erreur PDF:', err);
-    alert("❌ Erreur lors de l'analyse du fichier PDF.");
-  });
+    return; // On arrête l'exécution ici pour ne pas analyser comme Excel/image
+  }
 
-  return;
-}
+  // ===========================
+  // CAS IMAGE
+  // ===========================
+  if (['png', 'jpg', 'jpeg'].includes(extension)) {
+    const formData = new FormData();
+    formData.append('facture_image', file); // Envoie du fichier image au backend
 
-// 🔍 Cas image (PNG, JPG, JPEG)
-if (['png', 'jpg', 'jpeg'].includes(extension)) {
-  const formData = new FormData();
-  formData.append('facture_image', file);
+    fetch('/analyse_image', {
+      method: 'POST',
+      body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+      // Remplissage des champs à partir des données OCR
+      document.getElementById("nom_entreprise").value = data.fournisseur || '';
+      document.getElementById("numero_facture").value = data.numero_facture || '';
+      document.getElementById("date_facture").value = data.date_facture || '';
+      document.getElementById("echeance").value = data.echeance || '';
+      document.getElementById("total_ht").value = data.total_ht || '';
+      document.getElementById("tva").value = data.TVA || '';
+      document.getElementById("total_ttc").value = data.montant_total || '';
+      document.getElementById("nom_fichier").value = file.name;
 
-  fetch('/analyse_image', {
-    method: 'POST',
-    body: formData
-  })
-  .then(r => r.json())
-  .then(data => {
-    document.getElementById("nom_entreprise").value = data.fournisseur || '';
-    document.getElementById("numero_facture").value = data.numero_facture || '';
-    document.getElementById("date_facture").value = data.date_facture || '';
-    document.getElementById("echeance").value = data.echeance || '';
-    document.getElementById("total_ht").value = data.total_ht || '';
-    document.getElementById("tva").value = data.TVA || '';
-    document.getElementById("total_ttc").value = data.montant_total || '';
-    document.getElementById("nom_fichier").value = file.name;
+      form.style.display = 'block'; // Affiche le formulaire
 
-    form.style.display = 'block';
+      // Affiche l'image sélectionnée
+      const url = URL.createObjectURL(file);
+      preview.innerHTML = `
+        <img src="${url}" style="width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1);" />
+      `;
+      preview.style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Erreur image :', err); // Erreur technique en console
+      alert("❌ Erreur lors de l'analyse du fichier image."); // Alerte utilisateur
+    });
 
-    // 👇 AFFICHAGE DE L'IMAGE
-    const url = URL.createObjectURL(file);
-    preview.innerHTML = `
-      <img src="${url}" style="width: 100%; max-height: 85vh; object-fit: contain; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1);" />
-    `;
-    preview.style.display = 'block';
-  })
-  .catch(err => {
-    console.error('Erreur image :', err);
-    alert("❌ Erreur lors de l'analyse du fichier image.");
-  });
-
-  return;
-}
+    return;
+  }
 
 
-  // 🔍 Cas Excel / CSV
+  // ===========================
+  // CAS EXCEL ou CSV
+  // ===========================
   const reader = new FileReader();
+
   reader.onload = function (e) {
+    // Lecture du fichier Excel avec SheetJS
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data, { type: 'array' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
     const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false });
 
-    // Affichage tableau
+    // Affiche un tableau HTML dans la preview
     let table = '<table>';
     rows.forEach(row => {
       table += '<tr>' + row.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>';
@@ -112,15 +117,18 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
     preview.innerHTML = table;
     preview.style.display = 'block';
 
+    // Fonctions utilitaires pour extraire et nettoyer les champs
     const normalize = str => (str || '').toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/gi, '').toLowerCase();
     const cleanValue = val => (val || '').replace(/[^\d.,]/g, '').replace(',', '.').trim();
 
+    // Transforme le tableau en dictionnaire clé-valeur (clé = étiquette détectée)
     const flatMap = {};
     rows.forEach(row => {
       for (let i = 0; i < row.length; i++) {
         const current = String(row[i] || '').trim();
         const keyNorm = normalize(current);
 
+        // Cas où la valeur est dans la même cellule (ex: "Total HT : 123.45")
         if (current.includes(':')) {
           const [keyRaw, ...rest] = current.split(':');
           const key = normalize(keyRaw);
@@ -134,6 +142,8 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
             }
           }
           flatMap[key] = val;
+
+        // Cas où la clé est suivie d'une valeur dans la cellule suivante
         } else if (keyNorm && row[i + 1]) {
           const val = String(row[i + 1]).trim();
           if (val) flatMap[keyNorm] = val;
@@ -141,6 +151,7 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
       }
     });
 
+    // Fonction de recherche de valeur en fonction de synonymes possibles
     const findValue = (labels) => {
       for (let key in flatMap) {
         for (let label of labels) {
@@ -150,6 +161,7 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
       return '';
     };
 
+    // Conversion de date Excel ou texte → format ISO (aaaa-mm-jj)
     const formatDate = value => {
       const num = parseFloat(value);
       if (!isNaN(num) && num > 40000) {
@@ -165,34 +177,20 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
       return '';
     };
 
+    // Détection automatique d'une catégorie selon les mots-clés
     const detectCategory = () => {
       const nomEntreprise = findValue(["nom entreprise", "nomentreprise"]).toLowerCase();
       const allText = rows.flat().join(' ').toLowerCase();
 
-      if (nomEntreprise.includes('edf') || nomEntreprise.includes('engie') || nomEntreprise.includes('électricité') ||
-          allText.includes('électricité') || allText.includes('kwh') || allText.includes('consommation électrique')) {
-        return 'Électricité';
-      }
-      if (nomEntreprise.includes('veolia') || nomEntreprise.includes('suez') || nomEntreprise.includes('eau') ||
-          allText.includes('eau') || allText.includes('m3') || allText.includes('consommation eau')) {
-        return 'Eau';
-      }
-      if (nomEntreprise.includes('orange') || nomEntreprise.includes('sfr') || nomEntreprise.includes('bouygues') ||
-          nomEntreprise.includes('free') || nomEntreprise.includes('internet') || nomEntreprise.includes('box') ||
-          allText.includes('internet') || allText.includes('adsl') || allText.includes('fibre')) {
-        return 'Internet';
-      }
-      if (nomEntreprise.includes('téléphone') || nomEntreprise.includes('mobile') ||
-          allText.includes('téléphone') || allText.includes('mobile') || allText.includes('forfait')) {
-        return 'Téléphone';
-      }
-      if (nomEntreprise.includes('assurance') || nomEntreprise.includes('axa') || nomEntreprise.includes('maif') ||
-          nomEntreprise.includes('macif') || allText.includes('assurance') || allText.includes('prime')) {
-        return 'Assurance';
-      }
+      if (nomEntreprise.includes('edf') || nomEntreprise.includes('engie') || nomEntreprise.includes('électricité') || allText.includes('électricité')) return 'Électricité';
+      if (nomEntreprise.includes('veolia') || nomEntreprise.includes('suez') || nomEntreprise.includes('eau') || allText.includes('eau')) return 'Eau';
+      if (nomEntreprise.includes('orange') || nomEntreprise.includes('internet') || allText.includes('internet')) return 'Internet';
+      if (nomEntreprise.includes('téléphone') || allText.includes('mobile')) return 'Téléphone';
+      if (nomEntreprise.includes('assurance') || allText.includes('assurance')) return 'Assurance';
       return 'Non-catégorisée';
     };
 
+    // Remplit le formulaire avec les valeurs extraites
     document.getElementById("nom_entreprise").value = findValue(["nom entreprise", "nomentreprise"]);
     document.getElementById("date_facture").value = formatDate(findValue(["date de facture", "datedefacture"]));
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
@@ -202,6 +200,7 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
     document.getElementById("nom_fichier").value = file.name;
     document.getElementById("categorie").value = detectCategory();
 
+    // Fallback : si certains champs n'ont pas été trouvés, recherche dans les cellules HTML
     const fallbackFromDOM = (label, fieldId) => {
       if (!document.getElementById(fieldId).value) {
         const cells = [...document.querySelectorAll('#preview td')];
@@ -227,10 +226,10 @@ if (['png', 'jpg', 'jpeg'].includes(extension)) {
     fallbackFromDOM("taux de tva", "tva");
     fallbackFromDOM("total ttc", "total_ttc");
 
-    form.style.display = 'block';
+    form.style.display = 'block'; // Affiche le formulaire une fois rempli
   };
 
-  reader.readAsArrayBuffer(file);
+  reader.readAsArrayBuffer(file); // Lance la lecture du fichier Excel/CSV
 });
 
 // ✅ Validation des champs numériques
