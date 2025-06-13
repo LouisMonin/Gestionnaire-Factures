@@ -4,39 +4,29 @@
     <meta charset="UTF-8">
     <title>Factures enregistrées</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-
 </head>
 <body>
     {% include 'header.html' %}
-
-
-
 
     <div class="container">
         <h1>Liste des factures</h1>
 
         <button type="button" id="reset-filters-btn" class="standard-btn">Réinitialiser les filtres</button>
+        <button id="toggle-filters-btn" class="standard-btn">Afficher les filtres</button>
 
-<button id="toggle-filters-btn" class="standard-btn">Afficher les filtres</button>
-
-
-
-
-
-
-        <table id = "table-factures">
+        <table id="table-factures">
           <thead>
             <tr>
                 <th>ID</th>
                 <th>Entreprise <br>
                   <div class="filter-group" style="display:none;">
-                  <input type="text" placeholder="Filtrer Entreprise" class="filter-input" data-col="1">
-                </div>
+                    <input type="text" placeholder="Filtrer Entreprise" class="filter-input" data-col="1">
+                  </div>
                 </th>
                 <th>Libellé <br>
                   <div class="filter-group" style="display:none;">
-                  <input type="text" placeholder="Filtrer Libellé" class="filter-input" data-col="2">
-                </div>
+                    <input type="text" placeholder="Filtrer Libellé" class="filter-input" data-col="2">
+                  </div>
                 </th>
                 <th>Date facture</th>
                 <th>Échéance</th>
@@ -45,209 +35,67 @@
                 <th>Total TTC</th>
                 <th>Payée <br>
                   <div class="filter-group" style="display:none;">
-                  <select id="filter-paid" title="Filtrer les factures payées" data-col="7" style="text-align: center; text-align-last: center;">
-                    <option value="toutes">Toutes</option>
-                    <option value="payee">Payée</option>
-                    <option value="impayee">Non payée</option>
-                  </select>
+                    <select id="filter-paid" title="Filtrer les factures payées" data-col="7" style="text-align: center; text-align-last: center;">
+                      <option value="toutes">Toutes</option>
+                      <option value="payee">Payée</option>
+                      <option value="impayee">Non payée</option>
+                    </select>
                   </div>
                 </th>
-
-
                 <th>
                   Catégorisation <br>
                   <div class="filter-group" style="display:none;">
-                  <select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
-                    <option value="">Toutes</option> <!-- Option vide pour ne pas filtrer -->
-                    {% for cat in categories %}
-                      <option value="{{ cat }}">{{ cat }}</option>
-                    {% endfor %}
-                  </select>
+                    <select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
+                      <option value="">Toutes</option>
+                      {% for cat in categories %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
                 </th>
-
                 <th>Supprimer</th>
             </tr>
           </thead>
-          </tr>
 
-
-            {% for f in factures %}
-            <tr>
-                <td>
-                    {% if f['nom_fichier'] %}
-                      <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger la facture {{ f['id'] }}">
-                        {{ f['id'] }}
-                      </a>
-                    {% else %}
+          {% for f in factures %}
+          <tr>
+              <td>
+                  {% if f['nom_fichier'] %}
+                    <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger la facture {{ f['id'] }}">
                       {{ f['id'] }}
-                    {% endif %}
-                  </td>
-
-                <td>{{ f['fournisseur'] }}</td>
-                <td>{{ f['numero_facture'] }}</td>
-                <td>{{ f['date_facture'] }}</td>
-                <td>{{ f['echeance'] }}</td>
-                <td>{{ f['TVA'] }} %</td>
-                <td>{{ f['somme_finale'] }} €</td>
-                <td>{{ f['montant_total'] }} €</td>
-                <td>
-                    <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
-                        <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
-                    </form>
-                  </td>
-
-<td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
-    <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
-      <select name="categorie" onchange="this.form.submit()">
-        {% for cat in categories %}
-          <option value="{{ cat }}" {% if f['categorie'] == cat %}selected{% endif %}>{{ cat }}</option>
-        {% endfor %}
-      </select>
-    </form>
-  </td>
-                <td>
-                    <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
-                        <button type="submit" class="danger">X</button>
-                    </form>
-                </td>
-
-            </tr>
-            {% endfor %}
-
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-  const table = document.getElementById('table-factures');
-  const paidFilter = document.getElementById('filter-paid');
-  const textFilters = document.querySelectorAll('.filter-input');
-  const toggleBtn = document.getElementById('toggle-filters-btn');
-  const resetBtn = document.getElementById('reset-filters-btn');
-  const filterGroups = document.querySelectorAll('.filter-group');
-
-  const rowsPerPage = 10;
-  let currentPage = 1;
-
-  const noResultRow = document.createElement('tr');
-  const td = document.createElement('td');
-  td.colSpan = table.rows[0].cells.length;
-  td.style.textAlign = 'center';
-  td.textContent = 'Aucune facture';
-  noResultRow.appendChild(td);
-  noResultRow.style.display = 'none';
-  table.tBodies[0].appendChild(noResultRow);
-
-  const paginationControls = document.getElementById('pagination-controls');
-  const prevBtn = document.getElementById('prevPage');
-  const nextBtn = document.getElementById('nextPage');
-  const pageInfo = document.getElementById('pageInfo');
-
-  function getFilteredRows() {
-    const allRows = Array.from(table.tBodies[0].rows).filter(r => r !== noResultRow);
-    return allRows.filter(row => {
-      let visible = true;
-
-      // Filtres texte et select
-      textFilters.forEach(input => {
-        const col = parseInt(input.dataset.col);
-        const cell = row.cells[col];
-        let cellText = '';
-
-        const select = cell.querySelector('select');
-        if (select) {
-          cellText = select.value.toLowerCase();
-        } else {
-          cellText = cell.textContent.toLowerCase();
-        }
-
-        if (input.value && !cellText.includes(input.value.toLowerCase())) {
-          visible = false;
-        }
-      });
-
-      // Filtre Payée
-      const checkbox = row.cells[8]?.querySelector('input[type="checkbox"]');
-      if (checkbox) {
-        const estPayee = checkbox.checked;
-        if (paidFilter.value === 'payee' && !estPayee) visible = false;
-        if (paidFilter.value === 'impayee' && estPayee) visible = false;
-      }
-
-      return visible;
-    });
-  }
-
-  function renderPagination(filteredRows) {
-    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-    if (currentPage > totalPages) currentPage = totalPages || 1;
-
-    filteredRows.forEach((row, i) => {
-      row.style.display = (i >= (currentPage - 1) * rowsPerPage && i < currentPage * rowsPerPage) ? '' : 'none';
-    });
-
-    // Cache tous les autres
-    Array.from(table.tBodies[0].rows).forEach(row => {
-      if (!filteredRows.includes(row) && row !== noResultRow) row.style.display = 'none';
-    });
-
-    noResultRow.style.display = filteredRows.length === 0 ? '' : 'none';
-    pageInfo.textContent = `Page ${currentPage} sur ${Math.max(totalPages, 1)}`;
-    prevBtn.disabled = currentPage <= 1;
-    nextBtn.disabled = currentPage >= totalPages;
-  }
-
-  function updateTable() {
-    const filteredRows = getFilteredRows();
-    renderPagination(filteredRows);
-  }
-
-  // Navigation pagination
-  prevBtn.addEventListener('click', () => {
-    currentPage--;
-    updateTable();
-  });
-
-  nextBtn.addEventListener('click', () => {
-    currentPage++;
-    updateTable();
-  });
-
-  // Mise à jour sur saisie des filtres
-  textFilters.forEach(input => input.addEventListener('input', () => {
-    currentPage = 1;
-    updateTable();
-  }));
-
-  paidFilter.addEventListener('change', () => {
-    currentPage = 1;
-    updateTable();
-  });
-
-  // Bouton toggle affichage filtres
-  toggleBtn.addEventListener('click', function () {
-    const isVisible = this.classList.toggle('active');
-    filterGroups.forEach(group => {
-      group.style.display = isVisible ? 'block' : 'none';
-    });
-    this.textContent = isVisible ? 'Masquer les filtres' : 'Afficher les filtres';
-  });
-
-  // Bouton Réinitialiser les filtres
-  resetBtn.addEventListener('click', () => {
-    textFilters.forEach(input => input.value = '');
-    paidFilter.value = 'toutes';
-    currentPage = 1;
-    updateTable();
-  });
-
-  // Initialisation
-  updateTable();
-});
-
-
-
-</script>
-
-
-
+                    </a>
+                  {% else %}
+                    {{ f['id'] }}
+                  {% endif %}
+              </td>
+              <td>{{ f['fournisseur'] }}</td>
+              <td>{{ f['numero_facture'] }}</td>
+              <td>{{ f['date_facture'] }}</td>
+              <td>{{ f['echeance'] }}</td>
+              <td>{{ f['TVA'] }} %</td>
+              <td>{{ f['somme_finale'] }} €</td>
+              <td>{{ f['montant_total'] }} €</td>
+              <td>
+                  <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
+                      <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
+                  </form>
+              </td>
+              <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
+                  <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
+                    <select name="categorie" onchange="this.form.submit()">
+                      {% for cat in categories %}
+                        <option value="{{ cat }}" {% if f['categorie'] == cat %}selected{% endif %}>{{ cat }}</option>
+                      {% endfor %}
+                    </select>
+                  </form>
+              </td>
+              <td>
+                  <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
+                      <button type="submit" class="danger">X</button>
+                  </form>
+              </td>
+          </tr>
+          {% endfor %}
         </table>
 
         <form method="POST" action="/supprimer_tout" onsubmit="return confirm('Supprimer toutes les factures ?');">
@@ -255,17 +103,14 @@ document.addEventListener('DOMContentLoaded', function () {
         </form>
 
         <div id="pagination-controls" class="pagination">
-    <button id="prevPage" disabled>Précédente</button>
-    <span id="pageInfo">Page 1</span>
-    <button id="nextPage">Suivante</button>
-</div>
-
+            <button id="prevPage" disabled>Précédente</button>
+            <span id="pageInfo">Page 1</span>
+            <button id="nextPage">Suivante</button>
+        </div>
     </div>
 
     {% include 'footer.html' %}
 
-
-
-
+    <script src="{{ url_for('static', filename='factures.js') }}"></script>
 </body>
 </html>
