@@ -196,7 +196,7 @@ document.getElementById('facture').addEventListener('change', function () {
     document.getElementById("echeance").value = formatDate(findValue(["echeance", "echeance de paiement"]));
     document.getElementById("total_ht").value = cleanValue(findValue(["sous total", "sous-total", "soustotal", "total ht", "totalht", "ht"]));
     document.getElementById("tva").value = cleanValue(findValue(["taux de tva", "tauxtva", "tva"]));
-    document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc"]));
+    document.getElementById("total_ttc").value = cleanValue(findValue(["total ttc", "totalttc", "montant total", "montanttotal", "ttc"]));
     document.getElementById("nom_fichier").value = file.name;
     document.getElementById("categorie").value = detectCategory();
 
