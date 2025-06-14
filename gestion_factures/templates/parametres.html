@@ -1,12 +1,42 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    
     <meta charset="UTF-8">
     <title>Paramètres</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% include 'header.html' %}
     <h1>Page Paramètres</h1>
-    <p>Voici ta page paramètres.</p>
+
+    <table id ="table-categories">
+        <thead>
+            <tr>
+                <th>Nom de la catégorie</th>
+                <th>Couleur</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for categorie in categories %}
+            <tr>
+                <td>{{ categorie.nom.id }}</td>
+                <td>{{ categorie.couleur }}</td>
+                <td>
+                    <form method="POST" action="/supprimer_categorie/{{ categorie.id }}" style="display:inline;">
+                        <button type="submit" class="delete-btn">Supprimer</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+
+    </table>
     <a href="/">Retour à l'accueil</a>
+    {% include 'footer.html' %}
+
+    <script src="{{ url_for('static', filename='factures.js') }}"></script>
 </body>
 </html>
