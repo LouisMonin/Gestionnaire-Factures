@@ -28,13 +28,23 @@
                     <input type="text" placeholder="Filtrer Libellé" class="filter-input" data-col="2">
                   </div>
                 </th>
-                <th>Date facture</th>
-                <th>Échéance</th>
+                <th>Date facture
+                <div class="filter-group" style="display:none;">
+                <button class="sort-btn" data-col="3" data-type="date">⇅</button>
+                </div>
+                </th>
+
+                <th>Échéance
+                <div class="filter-group" style="display:none;">
+                <button class="sort-btn" data-col="4" data-type="date">⇅</button>
+                </div>
+                </th>
+
                 <th>TVA</th>
                 <th>Total HT</th>
                 <th>Total TTC</th>
                 <th>Payée <br>
-  <div class="filter-group" style="display:none;">
+                <div class="filter-group" style="display:none;">
     <select id="filter-paid" title="Filtrer les factures payées" data-col="8">
       <option value="toutes">Toutes</option>
       <option value="payee">Payée</option>
