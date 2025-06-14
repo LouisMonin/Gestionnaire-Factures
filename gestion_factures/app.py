@@ -156,6 +156,7 @@ def logout():
     session.clear()
     return redirect('/login')
 
+""" Partie upload des factures """
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload():
@@ -211,10 +212,12 @@ def upload():
             categorie  # Ajout du paramètre catégorie
         )
 
-        flash("✅ Facture enregistrée avec succès.", "success")
+        flash("Facture enregistrée avec succès.", "success")
         return redirect(url_for('accueil'))
 
     return render_template('upload.html')
+
+""" Routes pour l'analyse des factures via OCR pour PDF """
 
 @app.route('/analyse_pdf', methods=['POST'])
 def analyse_pdf():
@@ -238,7 +241,69 @@ def analyse_pdf():
         print(f"Erreur d'analyse PDF : {e}")
         return jsonify({"error": "Erreur lors de l'analyse PDF"}), 500
 
+""" Routes pour l'analyse des factures via OCR pour image (PNG/JPG/JPEG) """
 
+@app.route('/analyse_image', methods=['POST'])
+def analyse_image():
+    """ Analyse une image de facture PNG/JPG/JPEG et retourne les données extraites """
+    fichier = request.files.get('facture_image')
+    if not fichier:
+        return jsonify({"error": "Aucun fichier image reçu"}), 400
+
+    try:
+        chemin_temp = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_image_facture.png')
+        fichier.save(chemin_temp)
+
+        image = Image.open(chemin_temp)
+        texte = pytesseract.image_to_string(image)
+        infos = extraire_infos(texte)
+        return jsonify(infos)
+
+    except Exception as e:
+        print(f"Erreur /analyse_image : {e}")
+        return jsonify({"error": "Erreur lors de l'analyse de l'image"}), 500
+
+""" Fonction pour extraire les informations d'une facture à partir du texte OCR """
+
+def extraire_infos(texte):
+    import re
+    from datetime import datetime
+
+    def clean_num(s):
+        return re.sub(r"[^\d,.\-]", "", s).replace(",", ".").strip()
+
+    def extract_date(text):
+        match = re.search(r'(\d{1,2}/\d{1,2}/\d{2,4})', text)
+        if match:
+            d, m, y = match.group(1).split('/')
+            y = '20' + y if len(y) == 2 else y
+            return f"{y}-{m.zfill(2)}-{d.zfill(2)}"
+        return ""
+
+    def extract_first_matching(label_keywords, lines, as_date=False):
+        for line in lines:
+            for keyword in label_keywords:
+                if keyword.lower() in line.lower():
+                    if as_date:
+                        return extract_date(line)
+                    else:
+                        match = re.search(r'[:\-]?\s*([€\d][\d\s,.]*)', line)
+                        if match:
+                            return clean_num(match.group(1))
+        return ""
+
+    lines = [l.strip() for l in texte.split('\n') if l.strip()]
+
+    return {
+        "fournisseur": next((l for l in lines if "nom entreprise" in l.lower()), lines[0]),
+        "numero_facture": extract_first_matching(["numéro de facture", "n° de facture"], lines),
+        "date_facture": extract_first_matching(["date de facture"], lines, as_date=True),
+        "echeance": extract_first_matching(["échéance de paiement", "échéance"], lines, as_date=True),
+        "total_ht1": extract_first_matching(["sous-total", "total ht", "prix total ht"], lines),
+        "TVA": extract_first_matching(["tva", "taux de tva"], lines),
+        "montant_total": extract_first_matching(["total ttc"], lines),
+        "total_ht": extract_first_matching(["total ht"], lines)
+    }
 
 @app.route('/factures')
 def afficher_factures():
@@ -252,9 +317,7 @@ def afficher_factures():
 
     # Catégories de factures
     categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
-
-
-
+    # Si la catégorie n'est pas dans la liste, on l'ajoute
     return render_template('factures.html', factures=factures, categories=categories)
 
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
@@ -295,7 +358,7 @@ def parametres():
     return render_template('parametres.html')
 
 
-
+# Route pour afficher les factures en format JSON
 @app.route('/factures/json')
 def factures_json():
     """ Route pour obtenir les factures en format JSON """
@@ -310,7 +373,7 @@ def factures_json():
     } for f in factures])
 
 
-
+# Route pour afficher les factures en format JSON dans une page dédiée
 @app.route('/factures/json/page')
 def json_visuel():
     """ Route pour afficher les factures en format JSON dans une page dédiée """
@@ -324,6 +387,7 @@ def json_visuel():
         "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "echeance": f['echeance'], "TVA": f['TVA'], "montant_total": f['montant_total']
     } for f in factures])
 
+# Route pour analyser les factures
 @app.route('/analyse', methods=['GET', 'POST'])
 def analyse():
     """ Route pour analyser les factures """
@@ -660,71 +724,6 @@ def injecter_pseudo():
     """ Route pour afficher le pseudo de l'utilisateur dans les templates """
     return {"pseudo": session.get("pseudo")}
 
-def ocr_core(fichier):
-    """ Fonction pour effectuer l'OCR sur une image ou un PDF """
-    return pytesseract.image_to_string(Image.open(fichier))
-
-def extraire_infos(texte):
-    import re
-    from datetime import datetime
-
-    def clean_num(s):
-        return re.sub(r"[^\d,.\-]", "", s).replace(",", ".").strip()
-
-    def extract_date(text):
-        match = re.search(r'(\d{1,2}/\d{1,2}/\d{2,4})', text)
-        if match:
-            d, m, y = match.group(1).split('/')
-            y = '20' + y if len(y) == 2 else y
-            return f"{y}-{m.zfill(2)}-{d.zfill(2)}"
-        return ""
-
-    def extract_first_matching(label_keywords, lines, as_date=False):
-        for line in lines:
-            for keyword in label_keywords:
-                if keyword.lower() in line.lower():
-                    if as_date:
-                        return extract_date(line)
-                    else:
-                        match = re.search(r'[:\-]?\s*([€\d][\d\s,.]*)', line)
-                        if match:
-                            return clean_num(match.group(1))
-        return ""
-
-    lines = [l.strip() for l in texte.split('\n') if l.strip()]
-
-    return {
-        "fournisseur": next((l for l in lines if "nom entreprise" in l.lower()), lines[0]),
-        "numero_facture": extract_first_matching(["numéro de facture", "n° de facture"], lines),
-        "date_facture": extract_first_matching(["date de facture"], lines, as_date=True),
-        "echeance": extract_first_matching(["échéance de paiement", "échéance"], lines, as_date=True),
-        "total_ht1": extract_first_matching(["sous-total", "total ht", "prix total ht"], lines),
-        "TVA": extract_first_matching(["tva", "taux de tva"], lines),
-        "montant_total": extract_first_matching(["total ttc"], lines),
-        "total_ht": extract_first_matching(["total ht"], lines)
-    }
-
-@app.route('/analyse_image', methods=['POST'])
-def analyse_image():
-    """ Analyse une image de facture PNG/JPG/JPEG et retourne les données extraites """
-    fichier = request.files.get('facture_image')
-    if not fichier:
-        return jsonify({"error": "Aucun fichier image reçu"}), 400
-
-    try:
-        chemin_temp = os.path.join(app.config['UPLOAD_FOLDER'], 'temp_image_facture.png')
-        fichier.save(chemin_temp)
-
-        image = Image.open(chemin_temp)
-        texte = pytesseract.image_to_string(image)
-        infos = extraire_infos(texte)
-        return jsonify(infos)
-
-    except Exception as e:
-        print(f"Erreur /analyse_image : {e}")
-        return jsonify({"error": "Erreur lors de l'analyse de l'image"}), 500
-
-
 if __name__ == "__main__":
     import webbrowser
     # 🛠️ Création sécurisée du dossier uploads si manquant
@@ -740,5 +739,3 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True, use_reloader=False)
-
-

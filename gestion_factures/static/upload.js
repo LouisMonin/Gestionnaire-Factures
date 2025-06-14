@@ -16,6 +16,7 @@ document.getElementById('facture').addEventListener('change', function () {
   // ===========================
   // CAS PDF
   // ===========================
+
   if (extension === 'pdf') {
     const formData = new FormData();
     formData.append('facture_pdf', file); // Envoie du fichier PDF au backend
@@ -58,6 +59,7 @@ document.getElementById('facture').addEventListener('change', function () {
   // ===========================
   // CAS IMAGE
   // ===========================
+
   if (['png', 'jpg', 'jpeg'].includes(extension)) {
     const formData = new FormData();
     formData.append('facture_image', file); // Envoie du fichier image au backend
@@ -95,14 +97,14 @@ document.getElementById('facture').addEventListener('change', function () {
     return;
   }
 
-
   // ===========================
   // CAS EXCEL ou CSV
   // ===========================
+
   const reader = new FileReader();
 
   reader.onload = function (e) {
-    // Lecture du fichier Excel avec SheetJS
+    // Lecture du fichier Excel avec SheetJS pas besoin d'une route dans /app.py
     const data = new Uint8Array(e.target.result);
     const workbook = XLSX.read(data, { type: 'array' });
     const sheet = workbook.Sheets[workbook.SheetNames[0]];
@@ -232,7 +234,7 @@ document.getElementById('facture').addEventListener('change', function () {
   reader.readAsArrayBuffer(file); // Lance la lecture du fichier Excel/CSV
 });
 
-// ✅ Validation des champs numériques
+// Validation des champs numériques
 ['total_ht', 'tva', 'total_ttc'].forEach(id => {
   const el = document.getElementById(id);
 
@@ -263,7 +265,7 @@ document.getElementById('facture').addEventListener('change', function () {
   });
 });
 
-// ✅ Validation des dates
+// Validation des dates
 function validateDates() {
   const dateFactureEl = document.getElementById('date_facture');
   const dateEcheanceEl = document.getElementById('echeance');
@@ -294,10 +296,7 @@ function validateDates() {
   return valid;
 }
 
-
-
-
-
+// Validation des montants HT et TTC
 function validateMontants() {
   const ht = parseFloat(document.getElementById('total_ht').value);
   const ttc = parseFloat(document.getElementById('total_ttc').value);
@@ -328,7 +327,7 @@ function validateMontants() {
   }
 }
 
-
+// Affiche un message d'erreur pour les dates
 function showDateError(element, message) {
   let errorMsg = element.parentNode.querySelector('.date-error');
   if (!errorMsg) {
@@ -391,8 +390,7 @@ document.getElementById('facture-formulaire').addEventListener('submit', functio
   }
 });
 
-
-
+// Écouteur pour le changement de fichier PDF
 document.getElementById('facture').addEventListener('change', function () {
       const file = this.files[0];
       if (!file) return;

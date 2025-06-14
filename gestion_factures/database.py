@@ -47,19 +47,54 @@ def init_db():
     conn.commit()
     conn.close()
 
-def insert_facture(fournisseur, date_facture, numero_facture, montant_total, tva,
-                   utilisateur_id, nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie="Non-catégorisée"):
+# Fonction pour insérer une facture dans la base de données
+def insert_facture(
+    fournisseur,
+    date_facture,
+    numero_facture,
+    montant_total,
+    tva,
+    utilisateur_id,
+    nom_fichier,
+    facture_payee,
+    numero_client,
+    echeance,
+    somme_finale,
+    categorie="Non-catégorisée"
+):
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
+
     c.execute('''
         INSERT INTO factures (
-            fournisseur, date_facture, numero_facture, montant_total, TVA, utilisateur_id,
-            nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie
+            fournisseur,
+            date_facture,
+            numero_facture,
+            montant_total,
+            TVA,
+            utilisateur_id,
+            nom_fichier,
+            facture_payee,
+            numero_client,
+            echeance,
+            somme_finale,
+            categorie
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ''', (
-        fournisseur, date_facture, numero_facture, montant_total, tva, utilisateur_id,
-        nom_fichier, facture_payee, numero_client, echeance, somme_finale, categorie
+        fournisseur,
+        date_facture,
+        numero_facture,
+        montant_total,
+        tva,
+        utilisateur_id,
+        nom_fichier,
+        facture_payee,
+        numero_client,
+        echeance,
+        somme_finale,
+        categorie
     ))
+
     conn.commit()
     conn.close()
 
