@@ -289,6 +289,13 @@ def modifier_categorie(facture_id):
     conn.close()
     return redirect(url_for('afficher_factures'))
 
+#route pour les paramètres de l'utilisateur
+@app.route('/parametres')
+def parametres():
+    return render_template('parametres.html')
+
+
+
 @app.route('/factures/json')
 def factures_json():
     """ Route pour obtenir les factures en format JSON """
@@ -301,6 +308,8 @@ def factures_json():
     return jsonify([{
         "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "echeance": f['echeance'], "TVA": f['TVA'], "montant_total": f['montant_total']
     } for f in factures])
+
+
 
 @app.route('/factures/json/page')
 def json_visuel():
@@ -731,3 +740,5 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True, use_reloader=False)
+
+
