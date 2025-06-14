@@ -19,40 +19,49 @@
     <th>Catégories</th>
     <th>Choix de la couleur</th>
 </tr>
-<tr>
-    <th>
-        
-            <input type="text" id="new_category1" required maxlength="50" placeholder="Nouvelle catégorie">
-        
-    </th>
-    
-    <th>
-        <span id="cat1_preview" class="error-message"></span>
-    </th>
-
-    <th>
-            <select id="color_select1">
-            <option value="">Choisir une couleur</option>
-            <option value="red">Rouge</option>
-            <option value="blue">Bleu</option>
-            <option value="green">Vert</option>
-            <option value="orange">Orange</option>
-            <option value="purple">Violet</option>
-            <option value="brown">Marron</option>
-            <option value="pink">Rose</option>
-            <option value="yellow">Jaune</option>
-            <option value="cyan">Cyan</option>
-            <option value="black">Noir</option>
-        </select>
-        </th>
-</tr>    
     </thead>
+ <tbody>
+  {% for i in range(1, 11) %}
+  <tr>
+    <td>
+      <input type="text" class="category-input" placeholder="Catégorie {{ i }}" maxlength="50">
+    </td>
+    <td>
+      <div class="category-preview"></div>
+    </td>
+    <td>
+      <select class="color-select">
+        <option value="">Choisir une couleur</option>
+        <option value="red">Rouge</option>
+        <option value="blue">Bleu</option>
+        <option value="green">Vert</option>
+        <option value="orange">Orange</option>
+        <option value="purple">Violet</option>
+        <option value="brown">Marron</option>
+        <option value="pink">Rose</option>
+        <option value="yellow">Jaune</option>
+        <option value="cyan">Cyan</option>
+        <option value="black">Noir</option>
+      </select>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+
+<tfoot>
+  <tr>
+    <td colspan="4" style="text-align:right;">
+      <button id="save-categories-btn">Enregistrer</button>
+    </td>
+  </tr>
+</tfoot>
+   
 </table>
 
 
     {% include 'footer.html' %}
 
-    <script src="{{ url_for('static', filename='parametres.js') }}"></script>
+<script src="{{ url_for('static', filename='parametres.js') }}"></script>
 
 </body>
 </html>

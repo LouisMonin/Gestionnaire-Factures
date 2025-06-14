@@ -1583,3 +1583,17 @@ button.full {
 #table-factures td:nth-child(9) {
   min-width: 100px;
 }
+
+
+.category-preview {
+  min-height: 30px;
+  padding: 10px;
+  border-radius: 6px;
+  font-weight: bold;
+  background-color: lightgray; /* couleur par défaut */
+  color: white;
+  display: inline-block;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.3s ease;
+}
