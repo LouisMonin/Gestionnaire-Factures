@@ -657,25 +657,37 @@ def analyse():
         })
 
     # Calculs pour le graphiques top 3 fournisseurs par catégorie
-    top_data = defaultdict(list)  # clé = catégorie, valeur = liste de (fournisseur, montant)
+
+
+    # Étape 1 : construire top_data avec tri des 3 premiers fournisseurs par montant décroissant
+    top_data = defaultdict(list)
 
     for row in top_fournisseurs_raw:
         cat = row['categorie'] or 'Autre'
         frs = row['fournisseur']
         montant = float(row['total'])
-        if len(top_data[cat]) < 3:
-            top_data[cat].append((frs, montant))
+        top_data[cat].append((frs, montant))
 
-    # Préparation pour Chart.js
-    fournisseurs_uniques = sorted({f for fournisseurs in top_data.values() for f, _ in fournisseurs})
+    # Étape 2 : ne garder que le top 3 trié pour chaque catégorie
+    for cat in top_data:
+        top_data[cat] = sorted(top_data[cat], key=lambda x: x[1], reverse=True)[:3]
+
+    # Étape 3 : récupérer tous les fournisseurs top par ordre décroissant par catégorie
     categories_top = sorted(top_data.keys())
+    fournisseurs_uniques = []
 
+    for cat in categories_top:
+        for frs, _ in top_data[cat]:
+            if frs not in fournisseurs_uniques:
+                fournisseurs_uniques.append(frs)
+
+    # Étape 4 : construire les datasets dans l’ordre des fournisseurs triés
     dataset_top_fournisseurs = []
     for frs in fournisseurs_uniques:
         data = []
         for cat in categories_top:
-            found = next((m for f, m in top_data[cat] if f == frs), 0)
-            data.append(found)
+            montant = next((m for f, m in top_data[cat] if f == frs), 0)
+            data.append(montant)
         dataset_top_fournisseurs.append({
             "label": frs,
             "data": data
