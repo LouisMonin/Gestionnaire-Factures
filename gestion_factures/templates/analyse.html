@@ -6,6 +6,7 @@
     <title>Analyse des factures</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 </head>
 
 <body>
@@ -171,9 +172,12 @@
 
     {% include 'footer.html' %}
 
+
     <script>
         const evolutionCtx = document.getElementById('evolutionChart');
         const pieCtx = document.getElementById('pieChart');
+        const barCtx = document.getElementById('barChart');
+        const ctxTop = document.getElementById('topFournisseursChart');
 
         new Chart(evolutionCtx, {
             type: 'line',
@@ -301,8 +305,6 @@
         });
 
 
-        const barCtx = document.getElementById('barChart');
-
         new Chart(barCtx, {
             type: 'bar',
             data: {
@@ -349,7 +351,7 @@
             }
         });
 
-        const ctxTop = document.getElementById('topFournisseursChart');
+
         new Chart(ctxTop, {
             type: 'bar',
             data: {
@@ -357,27 +359,52 @@
                 datasets: {{ dataset_top_fournisseurs | tojson }}
             },
             options: {
+                indexAxis: 'y',
                 responsive: true,
                 plugins: {
                     title: {
                         display: true,
-                        text: 'Top 3 Fournisseurs par Catégorie'
+                        text: 'Top 3 Fournisseurs par Catégorie',
+                        font: {
+                            size: 18,
+                            weight: 'bold'
+                        },
+                        padding: { top: 10, bottom: 30 }
                     },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false
+                    legend: {
+                        display: false
+                    },
+                    datalabels: {
+                        anchor: 'center',
+                        align: 'top',
+                        color: 'black',
+                        formatter: function(value, context) {
+                            if (value === 0) return null;
+                            return context.dataset.label;
+                        },
+                        font: {
+                            weight: 'single',
+                        },
                     }
                 },
                 scales: {
                     x: {
                         stacked: true,
-                        title: { display: true, text: 'Montant total (€)' }
+                        title: {
+                            display: true,
+                            text: 'Montant total (€)'
+                        }
                     },
                     y: {
-                        stacked: true
+                        stacked: true,
+                        title: {
+                            display: true,
+                            text: 'Catégories'
+                        }
                     }
                 }
-            }
+            },
+            plugins: [ChartDataLabels]
         });
 
         function exportCharts() {
