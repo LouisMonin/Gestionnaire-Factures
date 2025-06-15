@@ -22,6 +22,7 @@ import pandas as pd
 from datetime import datetime,date
 from collections import defaultdict
 import calendar
+from collections import defaultdict
 
 
 """ Configuration de l'application Flask """
@@ -598,6 +599,34 @@ def analyse():
     c.execute(query_histogramme, params_histogramme)
     factures_payees = c.fetchall()
 
+
+    # === Nouveau graphique : Top 3 fournisseurs par catégorie ===
+    query_top_fournisseurs = """
+        SELECT categorie, fournisseur, SUM(REPLACE(montant_total, ',', '.')) AS total
+        FROM factures
+        WHERE utilisateur_id = ?
+    """
+    params_top = [utilisateur_id]
+
+    if date_debut:
+        query_top_fournisseurs += f" AND {filtre_date} >= ?"
+        params_top.append(date_debut)
+    if date_fin:
+        query_top_fournisseurs += f" AND {filtre_date} <= ?"
+        params_top.append(date_fin)
+    if fournisseur and fournisseur.lower() != 'tous':
+        query_top_fournisseurs += " AND LOWER(fournisseur) = LOWER(?)"
+        params_top.append(fournisseur)
+
+    query_top_fournisseurs += """
+        GROUP BY categorie, fournisseur
+        ORDER BY categorie, total DESC
+    """
+
+    c.execute(query_top_fournisseurs, params_top)
+    top_fournisseurs_raw = c.fetchall()
+
+
     conn.close()
 
     # Regrouper par mois et catégorie
@@ -627,6 +656,30 @@ def analyse():
             "data": values
         })
 
+    # Calculs pour le graphiques top 3 fournisseurs par catégorie
+    top_data = defaultdict(list)  # clé = catégorie, valeur = liste de (fournisseur, montant)
+
+    for row in top_fournisseurs_raw:
+        cat = row['categorie'] or 'Autre'
+        frs = row['fournisseur']
+        montant = float(row['total'])
+        if len(top_data[cat]) < 3:
+            top_data[cat].append((frs, montant))
+
+    # Préparation pour Chart.js
+    fournisseurs_uniques = sorted({f for fournisseurs in top_data.values() for f, _ in fournisseurs})
+    categories_top = sorted(top_data.keys())
+
+    dataset_top_fournisseurs = []
+    for frs in fournisseurs_uniques:
+        data = []
+        for cat in categories_top:
+            found = next((m for f, m in top_data[cat] if f == frs), 0)
+            data.append(found)
+        dataset_top_fournisseurs.append({
+            "label": frs,
+            "data": data
+        })
 
     # Rendu template avec toutes les données
     return render_template('analyse.html',
@@ -654,6 +707,8 @@ def analyse():
         cumul_impayees=cumul_impayees,
         labels_mois=mois_tries,
         stacked_datasets=stacked_data,
+        categories_top=categories_top,
+        dataset_top_fournisseurs=dataset_top_fournisseurs,
     )
 
 

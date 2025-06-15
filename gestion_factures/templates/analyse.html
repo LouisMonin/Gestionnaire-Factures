@@ -160,6 +160,10 @@
             <canvas id="barChart"></canvas>
         </div>
 
+        <div class="chart-wrapper">
+            <canvas id="topFournisseursChart"></canvas>
+        </div>
+
         <div style="text-align:center">
             <button onclick="exportCharts()" class="button">📷 Télécharger les graphiques</button>
         </div>
@@ -340,6 +344,37 @@
                             color: '#444',
                             callback: value => '€' + value.toLocaleString('fr-FR', { minimumFractionDigits: 2 })
                         }
+                    }
+                }
+            }
+        });
+
+        const ctxTop = document.getElementById('topFournisseursChart');
+        new Chart(ctxTop, {
+            type: 'bar',
+            data: {
+                labels: {{ categories_top | tojson }},
+                datasets: {{ dataset_top_fournisseurs | tojson }}
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 3 Fournisseurs par Catégorie'
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    x: {
+                        stacked: true,
+                        title: { display: true, text: 'Montant total (€)' }
+                    },
+                    y: {
+                        stacked: true
                     }
                 }
             }
