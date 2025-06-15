@@ -464,7 +464,7 @@ def analyse():
     query_repart = """
         SELECT categorie, SUM(REPLACE(montant_total, ',', '.'))
         FROM factures
-        WHERE utilisateur_id = ? AND facture_payee = 1
+        WHERE utilisateur_id = ?
     """
     params_repart = [utilisateur_id]
 
@@ -581,7 +581,7 @@ def analyse():
     query_histogramme = """
         SELECT date_facture, montant_total, categorie
         FROM factures
-        WHERE utilisateur_id = ? AND facture_payee = 1
+        WHERE utilisateur_id = ?
     """
     params_histogramme = [utilisateur_id]
 
