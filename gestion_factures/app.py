@@ -806,3 +806,45 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True, use_reloader=False)
+
+
+
+def get_categories_db():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+
+@app.route('/parametres', methods=['GET', 'POST'])
+def parametres():
+    if request.method == 'POST':
+        data = request.get_json()
+        print("DEBUG data reçue:", data)  # debug data reçue
+        utilisateur_id = session.get('utilisateur_id')
+        if not utilisateur_id:
+            return jsonify({"message": "Utilisateur non connecté"}), 401
+        
+        if not data:
+            return jsonify({"message": "Aucune donnée reçue ou JSON malformé"}), 400
+
+        try:
+            conn = get_categories_db()
+            c = conn.cursor()
+            c.execute('DELETE FROM categories WHERE utilisateur_id = ?', (utilisateur_id,))
+
+            for cat in data:
+                nom = cat.get('nom')
+                couleur = cat.get('couleur')
+                if nom and couleur:
+                    c.execute('INSERT INTO categories (utilisateur_id, nom_categorie, couleur) VALUES (?, ?, ?)',
+                              (utilisateur_id, nom, couleur))
+
+            conn.commit()
+            conn.close()
+            return jsonify({"message": "Catégories enregistrées avec succès"}), 200
+        except Exception as e:
+            print("Erreur lors de l'enregistrement des catégories:")
+            return jsonify({"message": "Erreur serveur lors de l'enregistrement"}), 500
+
+    return render_template('parametres.html')
