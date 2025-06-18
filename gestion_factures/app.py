@@ -353,11 +353,6 @@ def modifier_categorie(facture_id):
     conn.close()
     return redirect(url_for('afficher_factures'))
 
-#route pour les paramètres de l'utilisateur
-@app.route('/parametres')
-def parametres():
-    return render_template('parametres.html')
-
 
 # Route pour afficher les factures en format JSON
 @app.route('/factures/json')
@@ -791,23 +786,6 @@ def injecter_pseudo():
     """ Route pour afficher le pseudo de l'utilisateur dans les templates """
     return {"pseudo": session.get("pseudo")}
 
-if __name__ == "__main__":
-    import webbrowser
-    # 🛠️ Création sécurisée du dossier uploads si manquant
-    if not os.path.exists(app.config['UPLOAD_FOLDER']):
-        try:
-            os.makedirs(app.config['UPLOAD_FOLDER'])
-            print(f"📂 Dossier uploads créé dans : {app.config['UPLOAD_FOLDER']}")
-        except Exception as e:
-            print(f"❌ Impossible de créer le dossier uploads : {e}")
-    else:
-        print(f"📁 Dossier uploads déjà présent : {app.config['UPLOAD_FOLDER']}")
-
-    init_db()
-    webbrowser.open('http://127.0.0.1:5000/login')
-    app.run(debug=True, use_reloader=False)
-
-
 
 def get_categories_db():
     conn = sqlite3.connect('categories.db')
@@ -824,7 +802,7 @@ def parametres():
         utilisateur_id = session.get('utilisateur_id')
         if not utilisateur_id:
             return jsonify({"message": "Utilisateur non connecté"}), 401
-        
+
         if not data:
             return jsonify({"message": "Aucune donnée reçue ou JSON malformé"}), 400
 
@@ -844,7 +822,25 @@ def parametres():
             conn.close()
             return jsonify({"message": "Catégories enregistrées avec succès"}), 200
         except Exception as e:
-            print("Erreur lors de l'enregistrement des catégories:")
+            print("Erreur lors de l'enregistrement des catégories:",e)
             return jsonify({"message": "Erreur serveur lors de l'enregistrement"}), 500
 
     return render_template('parametres.html')
+
+
+
+if __name__ == "__main__":
+    import webbrowser
+    # 🛠️ Création sécurisée du dossier uploads si manquant
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        try:
+            os.makedirs(app.config['UPLOAD_FOLDER'])
+            print(f"📂 Dossier uploads créé dans : {app.config['UPLOAD_FOLDER']}")
+        except Exception as e:
+            print(f"❌ Impossible de créer le dossier uploads : {e}")
+    else:
+        print(f"📁 Dossier uploads déjà présent : {app.config['UPLOAD_FOLDER']}")
+
+    init_db()
+    webbrowser.open('http://127.0.0.1:5000/login')
+    app.run(debug=True, use_reloader=False)
