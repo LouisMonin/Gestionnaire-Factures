@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+
 </head>
 
 <body>
@@ -352,14 +353,23 @@
         });
 
 
+
+
         new Chart(ctxTop, {
             type: 'bar',
             data: {
                 labels: {{ categories_top | tojson }},
-                datasets: {{ dataset_top_fournisseurs | tojson }}
+                datasets: {{ dataset_top_fournisseurs | tojson }}.map((dataset, index) => ({
+                    ...dataset,
+                    backgroundColor: [
+                        '#1f77b4', '#17becf', '#2ca02c',
+                        '#98df8a', '#1a55a0', '#aec7e8',
+                        '#9467bd', '#c5b0d5', '#6a3d9a',
+                        '#3c8dbc', '#5dade2', '#76d7c4'
+                    ][index % 12]
+                }))
             },
             options: {
-                indexAxis: 'y',
                 responsive: true,
                 plugins: {
                     title: {
@@ -376,8 +386,13 @@
                     },
                     datalabels: {
                         anchor: 'center',
-                        align: 'top',
+                        align: 'center',
                         color: 'black',
+                        backgroundColor: 'white',
+                        borderRadius: 4,
+                        borderWidth: 0.5,
+                        borderColor: 'black',
+                        padding: 4,
                         formatter: function(value, context) {
                             if (value === 0) return null;
                             return context.dataset.label;
