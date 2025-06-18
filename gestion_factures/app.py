@@ -809,7 +809,7 @@ def parametres():
         try:
             conn = get_categories_db()
             c = conn.cursor()
-            c.execute('DELETE FROM categories WHERE utilisateur_id = ?', (utilisateur_id,))
+            #c.execute('DELETE FROM categories WHERE utilisateur_id = ?', (utilisateur_id,))
 
             for cat in data:
                 nom = cat.get('nom')
