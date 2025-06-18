@@ -15,7 +15,6 @@
         <button id="toggle-filters-btn" class="standard-btn">Afficher les filtres</button>
         <a href="/parametres" class="standard-btn">Paramètres</a>
 
-        
         <table id="table-factures">
           <thead>
             <tr>
@@ -31,56 +30,53 @@
                   </div>
                 </th>
                 <th>Date facture
-                <div class="filter-group" style="display:none;">
-                <button class="sort-btn" data-col="3" data-type="date">⇅</button>
-                </div>
+                  <div class="filter-group" style="display:none;">
+                    <button class="sort-btn" data-col="3" data-type="date">⇅</button>
+                  </div>
                 </th>
-
                 <th>Échéance
-                <div class="filter-group" style="display:none;">
-                <button class="sort-btn" data-col="4" data-type="date">⇅</button>
-                </div>
+                  <div class="filter-group" style="display:none;">
+                    <button class="sort-btn" data-col="4" data-type="date">⇅</button>
+                  </div>
                 </th>
-
                 <th>TVA</th>
                 <th>Total HT</th>
                 <th>Total TTC</th>
                 <th>Payée <br>
-                <div class="filter-group" style="display:none;">
-    <select id="filter-paid" title="Filtrer les factures payées" data-col="8">
-      <option value="toutes">Toutes</option>
-      <option value="payee">Payée</option>
-      <option value="impayee">Non payée</option>
-    </select>
-  </div>
-</th>
-
-
+                  <div class="filter-group" style="display:none;">
+                    <select id="filter-paid" title="Filtrer les factures payées" data-col="8">
+                      <option value="toutes">Toutes</option>
+                      <option value="payee">Payée</option>
+                      <option value="impayee">Non payée</option>
+                    </select>
+                  </div>
+                </th>
                 <th>
                   Catégorisation <br>
                   <div class="filter-group" style="display:none;">
-                    <select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
-                      <option value="">Toutes</option>
-                      {% for cat in categories %}
-                        <option value="{{ cat }}">{{ cat }}</option>
-                      {% endfor %}
-                    </select>
+<select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
+  <option value="">Toutes</option>
+  {% for cat in categories %}
+    <option value="{{ cat['nom_categorie'] }}">{{ cat['nom_categorie'] }}</option>
+  {% endfor %}
+</select>
                   </div>
                 </th>
                 <th>Supprimer</th>
             </tr>
           </thead>
 
-          {% for f in factures %}
-          <tr>
+          <tbody>
+            {% for f in factures %}
+            <tr>
               <td>
-                  {% if f['nom_fichier'] %}
-                    <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger la facture {{ f['id'] }}">
-                      {{ f['id'] }}
-                    </a>
-                  {% else %}
+                {% if f['nom_fichier'] %}
+                  <a href="{{ url_for('telecharger_fichier', filename=f['nom_fichier']) }}" target="_blank" title="Télécharger la facture {{ f['id'] }}">
                     {{ f['id'] }}
-                  {% endif %}
+                  </a>
+                {% else %}
+                  {{ f['id'] }}
+                {% endif %}
               </td>
               <td>{{ f['fournisseur'] }}</td>
               <td>{{ f['numero_facture'] }}</td>
@@ -90,41 +86,43 @@
               <td>{{ f['somme_finale'] }} €</td>
               <td>{{ f['montant_total'] }} €</td>
               <td>
-                  <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
-                      <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
-                  </form>
+                <form action="{{ url_for('toggle_payee', facture_id=f['id']) }}" method="post">
+                  <input type="checkbox" name="checkbox_paiement" {% if f['facture_payee'] == 1 %}checked{% endif %} onchange="this.form.submit()">
+                </form>
               </td>
               <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
-                  <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
-                    <select name="categorie" onchange="this.form.submit()">
-                      {% for cat in categories %}
-                        <option value="{{ cat }}" {% if f['categorie'] == cat %}selected{% endif %}>{{ cat }}</option>
-                      {% endfor %}
-                    </select>
-                  </form>
+<form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
+  <select name="categorie" onchange="this.form.submit()">
+    {% for cat in categories %}
+      <option value="{{ cat['nom_categorie'] }}" {% if f['categorie'] == cat['nom_categorie'] %}selected{% endif %}>
+        {{ cat['nom_categorie'] }}
+      </option>
+    {% endfor %}
+  </select>
+</form>
               </td>
               <td>
-                  <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
-                      <button type="submit" class="danger">X</button>
-                  </form>
+                <form method="POST" action="/supprimer/{{ f['id'] }}" onsubmit="return confirm('Confirmer la suppression ?');">
+                  <button type="submit" class="danger">X</button>
+                </form>
               </td>
-          </tr>
-          {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
         </table>
 
         <form method="POST" action="/supprimer_tout" onsubmit="return confirm('Supprimer toutes les factures ?');">
-            <button type="submit" class="danger full">Supprimer toutes les factures</button>
+          <button type="submit" class="danger full">Supprimer toutes les factures</button>
         </form>
 
         <div id="pagination-controls" class="pagination">
-            <button id="prevPage" disabled>Précédente</button>
-            <span id="pageInfo">Page 1</span>
-            <button id="nextPage">Suivante</button>
+          <button id="prevPage" disabled>Précédente</button>
+          <span id="pageInfo">Page 1</span>
+          <button id="nextPage">Suivante</button>
         </div>
     </div>
 
     {% include 'footer.html' %}
-
     <script src="{{ url_for('static', filename='factures.js') }}"></script>
 </body>
 </html>

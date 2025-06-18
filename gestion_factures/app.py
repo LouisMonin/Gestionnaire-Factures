@@ -306,6 +306,15 @@ def extraire_infos(texte):
         "total_ht": extract_first_matching(["total ht"], lines)
     }
 
+def get_categories():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT nom_categorie, couleur FROM categories")
+    categories = cursor.fetchall()
+    conn.close()
+    return categories
+
 @app.route('/factures')
 def afficher_factures():
     """ Route pour afficher les factures de l'utilisateur """
@@ -315,10 +324,8 @@ def afficher_factures():
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
+    categories = get_categories()
 
-    # Catégories de factures
-    categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
-    # Si la catégorie n'est pas dans la liste, on l'ajoute
     return render_template('factures.html', factures=factures, categories=categories)
 
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
