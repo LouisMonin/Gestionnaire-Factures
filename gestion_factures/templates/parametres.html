@@ -17,12 +17,32 @@
     <thead>
 <tr>
     <th>Ajouter une catégorie</th>
+    <th>Catégories</th>
+    <th>Choix de la couleur</th>
 </tr>
     </thead>
  <tbody>
   <tr>
     <td>
-      <input type="text" class="category-input" placeholder="Catégorie" maxlength="50">
+      <input type="text" class="category-input" placeholder="Catégorie {{ 10 }}" maxlength="50">
+    </td>
+    <td>
+      <div class="category-preview"></div>
+    </td>
+    <td>
+      <select class="color-select">
+        <option value="">Choisir une couleur</option>
+        <option value="red">Rouge</option>
+        <option value="blue">Bleu</option>
+        <option value="green">Vert</option>
+        <option value="orange">Orange</option>
+        <option value="purple">Violet</option>
+        <option value="brown">Marron</option>
+        <option value="pink">Rose</option>
+        <option value="yellow">Jaune</option>
+        <option value="cyan">Cyan</option>
+        <option value="black">Noir</option>
+      </select>
     </td>
   </tr>
 </tbody>
@@ -40,6 +60,21 @@
 <br>
 <br>
 <br>
+
+<table id="categories-list">
+    <thead>
+<tr>
+    <th>Catégorie</th>
+    <th>Couleur</th>
+</tr>
+    </thead>
+ <tbody>
+{% for cat in list_categories %}
+    <td>{{ cat['nom_categorie'] }}</td>  <!-- Exact nom de la colonne -->
+    <td>{{cat['couleur']}}    </td>
+{% endfor %}
+</tbody>
+</table>
 
     {% include 'footer.html' %}
 
