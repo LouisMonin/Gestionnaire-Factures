@@ -213,8 +213,9 @@ def upload():
         flash("Facture enregistrée avec succès.", "success")
         return redirect(url_for('accueil'))
 
-    categories = get_categories()
+    categories = get_user_categories()
     return render_template('upload.html', categories=categories)
+
 
 
 """ Routes pour l'analyse des factures via OCR pour PDF """
