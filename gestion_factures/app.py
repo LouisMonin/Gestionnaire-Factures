@@ -799,6 +799,18 @@ def get_categories_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+@app.route('/categories')
+def afficher_categories():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row  # Permet d'accéder aux colonnes par nom
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM categories WHERE id = ?', (session['id'],))
+    categories = c.fetchall()
+    conn.close()
+
+    return render_template('parametres.html', categories=categories)
+
 
 
 @app.route('/parametres', methods=['GET', 'POST'])
@@ -834,17 +846,7 @@ def parametres():
 
     return render_template('parametres.html')
 
-@app.route('/categories', methods=['GET'])
-def afficher_categories():
-    """ Route pour afficher les categories de l'utilisateur """
-    conn = sqlite3.connect('categories.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
-    categories_list = c.fetchall()
-    conn.close()
 
-    return render_template('parametres.html', categories_list=categories_list)
 
 
 
