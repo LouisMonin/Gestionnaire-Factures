@@ -1,3 +1,5 @@
+"""Gestion des factures - Filtres et pagination"""
+
 document.addEventListener('DOMContentLoaded', function () {
   const table = document.getElementById('table-factures');
   const paidFilter = document.getElementById('filter-paid');
@@ -124,50 +126,43 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initialisation
   updateTable();
 
+  let currentSort = {
+    col: null,
+    order: 'asc'
+  };
 
-
-let currentSort = {
-  col: null,
-  order: 'asc'
-};
-
-function parseDate(str) {
-  // Format attendu : JJ/MM/AAAA ou AAAA-MM-JJ
-  if (!str) return null;
-  const parts = str.split('/');
-  if (parts.length === 3) {
-    return new Date(parts[2], parts[1] - 1, parts[0]); // JJ/MM/AAAA
+  function parseDate(str) {
+    // Format attendu : JJ/MM/AAAA ou AAAA-MM-JJ
+    if (!str) return null;
+    const parts = str.split('/');
+    if (parts.length === 3) {
+      return new Date(parts[2], parts[1] - 1, parts[0]); // JJ/MM/AAAA
+    }
+    return new Date(str); // fallback (ISO format)
   }
-  return new Date(str); // fallback (ISO format)
-}
 
-document.querySelectorAll('.sort-btn').forEach(btn => {
-  btn.addEventListener('click', function () {
-    const colIndex = parseInt(this.dataset.col);
-    const isSameCol = currentSort.col === colIndex;
-    currentSort.col = colIndex;
-    currentSort.order = isSameCol && currentSort.order === 'asc' ? 'desc' : 'asc';
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', function () {
+      const colIndex = parseInt(this.dataset.col);
+      const isSameCol = currentSort.col === colIndex;
+      currentSort.col = colIndex;
+      currentSort.order = isSameCol && currentSort.order === 'asc' ? 'desc' : 'asc';
 
-    const rows = getFilteredRows();
+      const rows = getFilteredRows();
 
-    rows.sort((a, b) => {
-      const aText = a.cells[colIndex].textContent.trim();
-      const bText = b.cells[colIndex].textContent.trim();
-      const aDate = parseDate(aText);
-      const bDate = parseDate(bText);
-      if (!aDate || !bDate) return 0;
+      rows.sort((a, b) => {
+        const aText = a.cells[colIndex].textContent.trim();
+        const bText = b.cells[colIndex].textContent.trim();
+        const aDate = parseDate(aText);
+        const bDate = parseDate(bText);
+        if (!aDate || !bDate) return 0;
 
-      return currentSort.order === 'asc' ? aDate - bDate : bDate - aDate;
+        return currentSort.order === 'asc' ? aDate - bDate : bDate - aDate;
+      });
+
+      // Réattache les lignes triées
+      rows.forEach(row => table.tBodies[0].appendChild(row));
+      updateTable();
     });
-
-    // Réattache les lignes triées
-    rows.forEach(row => table.tBodies[0].appendChild(row));
-    updateTable();
   });
-});
-
-
-
-
-
 });
