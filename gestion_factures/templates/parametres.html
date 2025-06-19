@@ -1,120 +1,65 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    
     <meta charset="UTF-8">
     <title>Paramètres</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        /* Pour centrer le tableau */
-        #categories-table {
-            margin: 20px auto;
-            border-collapse: collapse;
-            width: 80%;
-            max-width: 800px;
-        }
-        #categories-table th, #categories-table td {
-            border: 1px solid #ccc;
-            padding: 8px 12px;
-            text-align: left;
-        }
-        #add-category-container {
-            max-width: 600px;
-            margin: 20px auto;
-            padding: 15px 20px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            background-color: #f9f9f9;
-        }
-        #add-category-container h2 {
-            margin-top: 0;
-        }
-        #add-category-container label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: bold;
-        }
-        #add-category-container input[type="text"], 
-        #add-category-container select {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 12px;
-            box-sizing: border-box;
-        }
-        #save-categories-btn {
-            float: right;
-            padding: 8px 16px;
-            font-size: 1rem;
-        }
-        /* Messages d'erreur et succès */
-        #message {
-            clear: both;
-            margin-top: 12px;
-            padding: 10px;
-            border-radius: 4px;
-            display: none; /* caché par défaut */
-        }
-        #message.error {
-            background-color: #f8d7da;
-            color: #842029;
-            border: 1px solid #f5c2c7;
-        }
-        #message.success {
-            background-color: #d1e7dd;
-            color: #0f5132;
-            border: 1px solid #badbcc;
-        }
-    </style>
 </head>
 <body>
     {% include 'header.html' %}
 
     <h1>Paramètres</h1>
     <p>Dans cette section, vous pouvez ajouter des catégories pour organiser vos factures.</p>
+ 
+<table id = "categories-table">
+    <thead>
+<tr>
+    <th>Ajouter une catégorie</th>
+    <th>Catégories</th>
+    <th>Choix de la couleur</th>
+</tr>
+    </thead>
+ <tbody>
+  <tr>
+    <td>
+      <input type="text" class="category-input" placeholder="Catégorie {{ 10 }}" maxlength="50">
+    </td>
+    <td>
+      <div class="category-preview"></div>
+    </td>
+    <td>
+      <select class="color-select">
+        <option value="">Choisir une couleur</option>
+        <option value="red">Rouge</option>
+        <option value="blue">Bleu</option>
+        <option value="green">Vert</option>
+        <option value="orange">Orange</option>
+        <option value="purple">Violet</option>
+        <option value="brown">Marron</option>
+        <option value="pink">Rose</option>
+        <option value="yellow">Jaune</option>
+        <option value="cyan">Cyan</option>
+        <option value="black">Noir</option>
+      </select>
+    </td>
+  </tr>
+</tbody>
 
-    <!-- Encadré pour ajouter une catégorie -->
-    <section id="add-category-container">
-        <h2>Ajouter une catégorie</h2>
-        <label for="new-category-name">Nom de la catégorie :</label>
-        <input type="text" id="new-category-name" class="category-input" placeholder="Nouvelle catégorie" maxlength="50">
+<tfoot>
+  <tr>
+    <td colspan="4" style="text-align:right;">
+      <button id="save-categories-btn">Enregistrer</button>
+    </td>
+  </tr>
+</tfoot>
+   
+</table>
 
-        <label for="new-category-color">Choix de la couleur :</label>
-        <select id="new-category-color" class="color-select">
-            <option value="">Choisir une couleur</option>
-            <option value="red">Rouge</option>
-            <option value="blue">Bleu</option>
-            <option value="green">Vert</option>
-            <option value="orange">Orange</option>
-            <option value="purple">Violet</option>
-            <option value="brown">Marron</option>
-            <option value="pink">Rose</option>
-            <option value="yellow">Jaune</option>
-            <option value="cyan">Cyan</option>
-            <option value="black">Noir</option>
-        </select>
 
-        <button id="save-categories-btn">Enregistrer</button>
+    {% include 'footer.html' %}
 
-        <div id="message"></div>
-    </section>
+<script src="{{ url_for('static', filename='parametres.js') }}"></script>
 
-    <!-- Tableau centré des catégories existantes -->
-    <table id="categories-table">
-        <thead>
-            <tr>
-                <th>Catégorie</th>
-                <th>Couleur</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for category in categories %}
-            <tr>
-                <td>{{ category.name }}</td>
-                <td style="color: {{ category.color }};">{{ category.color }}</td>
-            </tr>
-            {% else %}
-            <tr>
-                <td colspan="2" style="text-align:center;">Aucune catégorie disponible.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+</body>
+</html>

@@ -1,131 +1,49 @@
-// Ajout dynamique de lignes dans le formulaire d'ajout
+// Dynamique : couleur et texte
+document.querySelectorAll('#categories-table tbody tr').forEach(row => {
+  const inputNom = row.querySelector('.category-input');
+  const selectCouleur = row.querySelector('.color-select');
+  const preview = row.querySelector('.category-preview');
 
-const tbodyForm = document.querySelector('#categories-table tbody');
-const btnSave = document.getElementById('save-categories-btn');
-
-// Fonction pour créer une ligne de formulaire catégorie
-function createCategoryRow(nom = '', couleur = '') {
-  const tr = document.createElement('tr');
-
-  // Col input nom
-  const tdNom = document.createElement('td');
-  const inputNom = document.createElement('input');
-  inputNom.type = 'text';
-  inputNom.classList.add('category-input');
-  inputNom.placeholder = 'Nom de la catégorie';
-  inputNom.maxLength = 50;
-  inputNom.value = nom;
-  tdNom.appendChild(inputNom);
-  tr.appendChild(tdNom);
-
-  // Col aperçu
-  const tdPreview = document.createElement('td');
-  const preview = document.createElement('div');
-  preview.classList.add('category-preview');
-  tdPreview.appendChild(preview);
-  tr.appendChild(tdPreview);
-
-  // Col select couleur
-  const tdColor = document.createElement('td');
-  const select = document.createElement('select');
-  select.classList.add('color-select');
-
-  const colors = [
-    { val: '', label: 'Choisir une couleur' },
-    { val: 'red', label: 'Rouge' },
-    { val: 'blue', label: 'Bleu' },
-    { val: 'green', label: 'Vert' },
-    { val: 'orange', label: 'Orange' },
-    { val: 'purple', label: 'Violet' },
-    { val: 'brown', label: 'Marron' },
-    { val: 'pink', label: 'Rose' },
-    { val: 'yellow', label: 'Jaune' },
-    { val: 'cyan', label: 'Cyan' },
-    { val: 'black', label: 'Noir' }
-  ];
-
-  colors.forEach(c => {
-    const option = document.createElement('option');
-    option.value = c.val;
-    option.textContent = c.label;
-    if (c.val === couleur) option.selected = true;
-    select.appendChild(option);
-  });
-
-  tdColor.appendChild(select);
-  tr.appendChild(tdColor);
-
-  // Event pour mise à jour aperçu
   function majPreview() {
-    const nomVal = inputNom.value.trim();
-    const couleurVal = select.value;
+    const nom = inputNom.value.trim();
+    const couleur = selectCouleur.value;
 
-    if (nomVal && couleurVal) {
-      preview.style.backgroundColor = couleurVal;
-      preview.textContent = nomVal;
-      preview.style.color = ['yellow', 'cyan', 'pink'].includes(couleurVal) ? 'black' : 'white';
-      preview.style.padding = '5px 10px';
-      preview.style.borderRadius = '4px';
+    if (nom && couleur) {
+      preview.style.backgroundColor = couleur;
+      preview.textContent = nom;
+      preview.style.color = 'white'; // ou noir selon la couleur, simple fix
+      preview.style.padding = '5px';
+      preview.style.borderRadius = '3px';
       preview.style.fontWeight = 'bold';
-      preview.style.display = 'inline-block';
     } else {
       preview.style.backgroundColor = 'transparent';
       preview.textContent = '';
       preview.style.padding = '';
       preview.style.borderRadius = '';
       preview.style.fontWeight = '';
-      preview.style.display = 'none';
     }
   }
 
   inputNom.addEventListener('input', majPreview);
-  select.addEventListener('change', majPreview);
-
-  // Initial preview
-  majPreview();
-
-  return tr;
-}
-
-// Bouton pour ajouter une nouvelle ligne (en haut ou en bas de la table)
-const addRowBtn = document.createElement('button');
-addRowBtn.type = 'button';
-addRowBtn.textContent = '+ Ajouter une catégorie';
-addRowBtn.style.margin = '10px 0';
-addRowBtn.addEventListener('click', () => {
-  tbodyForm.appendChild(createCategoryRow());
+  selectCouleur.addEventListener('change', majPreview);
 });
-document.querySelector('#categories-table').parentNode.insertBefore(addRowBtn, document.querySelector('#categories-table'));
 
-// Au chargement, si tbody vide, ajoute une ligne vide
-if (tbodyForm.children.length === 0) {
-  tbodyForm.appendChild(createCategoryRow());
-}
-
-// Gestion du clic "Enregistrer"
-btnSave.addEventListener('click', () => {
-  const rows = tbodyForm.querySelectorAll('tr');
+// Envoi au serveur
+document.getElementById('save-categories-btn').addEventListener('click', () => {
+  const rows = document.querySelectorAll('#categories-table tbody tr');
   const categories = [];
 
-  for (const row of rows) {
+  rows.forEach(row => {
     const nom = row.querySelector('.category-input').value.trim();
-    const couleur = row.querySelector('.color-select').value;
+    const couleur = row.querySelector('.color-select').value.trim();
 
-    if (nom || couleur) {
-      if (!nom) {
-        alert('Le nom de la catégorie est obligatoire.');
-        return;
-      }
-      if (!couleur) {
-        alert('La couleur est obligatoire.');
-        return;
-      }
+    if (nom && couleur) {
       categories.push({ nom, couleur });
     }
-  }
+  });
 
   if (categories.length === 0) {
-    alert('Veuillez saisir au moins une catégorie avec une couleur.');
+    alert("Veuillez saisir au moins une catégorie avec une couleur.");
     return;
   }
 
@@ -134,18 +52,19 @@ btnSave.addEventListener('click', () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(categories)
   })
-    .then(async response => {
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({}));
-        throw new Error(error.message || 'Erreur serveur');
-      }
-      return response.json();
-    })
-    .then(data => {
-      alert(data.message || 'Catégories enregistrées avec succès.');
-      window.location.reload();
-    })
-    .catch(err => {
-      alert('Erreur réseau ou serveur lors de l\'enregistrement : ' + err.message);
-    });
+  .then(async response => {
+    if (!response.ok) {
+      // Affiche le message d'erreur côté serveur si possible
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || "Erreur serveur");
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert(data.message || "Catégories enregistrées avec succès.");
+    window.location.reload();
+  })
+  .catch(err => {
+    alert("Erreur réseau ou serveur lors de l'enregistrement : " + err.message);
+  });
 });
