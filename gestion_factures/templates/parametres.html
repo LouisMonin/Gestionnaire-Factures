@@ -68,13 +68,9 @@
 </tr>
     </thead>
  <tbody>
-{% for categorie in categories %}
-  <tr>
-    <td>{{ categorie['nom_categorie'] }}</td>  <!-- Exact nom de la colonne -->
-    <td>
-      <div class="category-preview" style="background-color: {{ categorie.couleur }};"></div>
-    </td>
-  </tr>
+{% for cat in list_categories %}
+    <td>{{ cat['nom_categorie'] }}</td>  <!-- Exact nom de la colonne -->
+    <td>{{cat['couleur']}}    </td>
 {% endfor %}
 </tbody>
 </table>

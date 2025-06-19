@@ -1,9 +1,9 @@
 // Dynamique : couleur et texte
-document.querySelectorAll('#categories-table tbody tr').forEach(row => {
+  document.querySelectorAll('#categories-table tbody tr').forEach(row => {
+  const table = document.getElementById('categories-list');
   const inputNom = row.querySelector('.category-input');
   const selectCouleur = row.querySelector('.color-select');
   const preview = row.querySelector('.category-preview');
-  const table = document.getElementById('categories-list');
 
 
   function majPreview() {
@@ -13,7 +13,7 @@ document.querySelectorAll('#categories-table tbody tr').forEach(row => {
     if (nom && couleur) {
       preview.style.backgroundColor = couleur;
       preview.textContent = nom;
-      preview.style.color = 'white'; // ou noir selon la couleur, simple fix
+      preview.style.color = 'black'; // ou noir selon la couleur, simple fix
       preview.style.padding = '5px';
       preview.style.borderRadius = '3px';
       preview.style.fontWeight = 'bold';
@@ -70,3 +70,14 @@ document.getElementById('save-categories-btn').addEventListener('click', () => {
     alert("Erreur réseau ou serveur lors de l'enregistrement : " + err.message);
   });
 });
+
+  const noResultRow = document.createElement('tr');
+  const td = document.createElement('td');
+  td.colSpan = table
+  .rows[0].cells.length;
+  td.style.textAlign = 'center';
+  td.textContent = 'Aucune facture';
+  noResultRow.appendChild(td);
+  noResultRow.style.display = 'none';
+  table.tBodies[0].appendChild(noResultRow);
+
