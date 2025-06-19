@@ -310,7 +310,7 @@ def get_categories():
     conn = sqlite3.connect('categories.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT nom_categorie, couleur FROM categories")
+    cursor.execute("SELECT nom_categorie FROM categories")
     categories = cursor.fetchall()
     conn.close()
     return categories
@@ -320,7 +320,7 @@ def get_user_categories():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT nom_categorie, couleur FROM categories WHERE utilisateur_id = ?",
+        "SELECT nom_categorie FROM categories WHERE utilisateur_id = ?",
         (session['utilisateur_id'],)
     )
     categories = cursor.fetchall()
@@ -845,10 +845,9 @@ def parametres():
 
             for cat in data:
                 nom = cat.get('nom')
-                couleur = cat.get('couleur', '')
                 if nom:
-                    c.execute('INSERT INTO categories (utilisateur_id, nom_categorie, couleur) VALUES (?, ?, ?)',
-                              (utilisateur_id, nom, couleur))
+                    c.execute('INSERT INTO categories (utilisateur_id, nom_categorie ) VALUES (?, ?)',
+                              (utilisateur_id, nom))
 
             conn.commit()
             conn.close()

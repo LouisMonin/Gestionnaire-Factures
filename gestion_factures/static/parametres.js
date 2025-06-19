@@ -2,15 +2,13 @@
 document.querySelectorAll('#categories-table tbody tr').forEach(row => {
   const table = document.getElementById('categories-list');
   const inputNom = row.querySelector('.category-input');
-  const selectCouleur = row.querySelector('.color-select');
+  //const selectCouleur = row.querySelector('.color-select');
   const preview = row.querySelector('.category-preview');
 
   function majPreview() {
     const nom = inputNom.value.trim();
-    const couleur = selectCouleur.value;
 
-    if (nom && couleur) {
-      preview.style.backgroundColor = couleur;
+    if (nom) {
       preview.textContent = nom;
       preview.style.color = 'black'; // ou noir selon la couleur, simple fix
       preview.style.padding = '5px';
@@ -25,8 +23,8 @@ document.querySelectorAll('#categories-table tbody tr').forEach(row => {
     }
   }
 
-  inputNom.addEventListener('input', majPreview);
-  selectCouleur.addEventListener('change', majPreview);
+  //inputNom.addEventListener('input', majPreview);
+  //selectCouleur.addEventListener('change', majPreview);
 });
 
 // Envoi au serveur
