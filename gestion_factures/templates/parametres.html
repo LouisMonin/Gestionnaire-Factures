@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    
+
     <meta charset="UTF-8">
     <title>Paramètres</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -10,8 +10,9 @@
     {% include 'header.html' %}
 
     <h1>Paramètres</h1>
+    <button class="btn-retour" onclick="history.back()">Retour</button>
     <p>Dans cette section, vous pouvez ajouter des catégories pour organiser vos factures.</p>
- 
+
 <table id = "categories-table">
     <thead>
 <tr>
@@ -53,7 +54,7 @@
     </td>
   </tr>
 </tfoot>
-   
+
 </table>
 
 <br>

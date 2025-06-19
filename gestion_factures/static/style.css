@@ -1597,3 +1597,16 @@ button.full {
   box-sizing: border-box;
   transition: background-color 0.3s ease;
 }
+
+.btn-retour {
+  background-color: #f0f0f0;
+  border: none;
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-retour:hover {
+  background-color: #ddd;
+}
