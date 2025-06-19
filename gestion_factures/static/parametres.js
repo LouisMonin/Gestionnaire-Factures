@@ -1,10 +1,9 @@
 // Dynamique : couleur et texte
-  document.querySelectorAll('#categories-table tbody tr').forEach(row => {
+document.querySelectorAll('#categories-table tbody tr').forEach(row => {
   const table = document.getElementById('categories-list');
   const inputNom = row.querySelector('.category-input');
   const selectCouleur = row.querySelector('.color-select');
   const preview = row.querySelector('.category-preview');
-
 
   function majPreview() {
     const nom = inputNom.value.trim();
@@ -54,30 +53,29 @@ document.getElementById('save-categories-btn').addEventListener('click', () => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(categories)
   })
-  .then(async response => {
-    if (!response.ok) {
-      // Affiche le message d'erreur côté serveur si possible
-      const error = await response.json().catch(() => ({}));
-      throw new Error(error.message || "Erreur serveur");
-    }
-    return response.json();
-  })
-  .then(data => {
-    alert(data.message || "Catégories enregistrées avec succès.");
-    window.location.reload();
-  })
-  .catch(err => {
-    alert("Erreur réseau ou serveur lors de l'enregistrement : " + err.message);
-  });
+    .then(async response => {
+      if (!response.ok) {
+        // Affiche le message d'erreur côté serveur si possible
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.message || "Erreur serveur");
+      }
+      return response.json();
+    })
+    .then(data => {
+      alert(data.message || "Catégories enregistrées avec succès.");
+      window.location.reload();
+    })
+    .catch(err => {
+      alert("Erreur réseau ou serveur lors de l'enregistrement : " + err.message);
+    });
 });
 
-  const noResultRow = document.createElement('tr');
-  const td = document.createElement('td');
-  td.colSpan = table
+const noResultRow = document.createElement('tr');
+const td = document.createElement('td');
+td.colSpan = table
   .rows[0].cells.length;
-  td.style.textAlign = 'center';
-  td.textContent = 'Aucune facture';
-  noResultRow.appendChild(td);
-  noResultRow.style.display = 'none';
-  table.tBodies[0].appendChild(noResultRow);
-
+td.style.textAlign = 'center';
+td.textContent = 'Aucune facture';
+noResultRow.appendChild(td);
+noResultRow.style.display = 'none';
+table.tBodies[0].appendChild(noResultRow);
