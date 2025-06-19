@@ -56,6 +56,28 @@
    
 </table>
 
+<br>
+<br>
+<br>
+
+<table id="categories-list">
+    <thead>
+<tr>
+    <th>Catégorie</th>
+    <th>Couleur</th>
+</tr>
+    </thead>
+ <tbody>
+  {% for categorie in categories %}
+  <tr>
+    <td>{{ categorie.nom }}</td>
+    <td>
+      <div class="category-preview" style="background-color: {{ categorie.couleur }};"></div>
+    </td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
 
     {% include 'footer.html' %}
 

@@ -834,6 +834,19 @@ def parametres():
 
     return render_template('parametres.html')
 
+@app.route('/categories', methods=['GET'])
+def afficher_categories():
+    """ Route pour afficher les categories de l'utilisateur """
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    categories_list = c.fetchall()
+    conn.close()
+
+    return render_template('parametres.html', categories_list=categories_list)
+
+
 
 
 if __name__ == "__main__":
