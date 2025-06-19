@@ -3,6 +3,8 @@ document.querySelectorAll('#categories-table tbody tr').forEach(row => {
   const inputNom = row.querySelector('.category-input');
   const selectCouleur = row.querySelector('.color-select');
   const preview = row.querySelector('.category-preview');
+  const table = document.getElementById('categories-list');
+
 
   function majPreview() {
     const nom = inputNom.value.trim();

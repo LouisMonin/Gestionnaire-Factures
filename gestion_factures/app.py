@@ -306,6 +306,15 @@ def extraire_infos(texte):
         "total_ht": extract_first_matching(["total ht"], lines)
     }
 
+def get_categories():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT nom_categorie, couleur FROM categories")
+    categories = cursor.fetchall()
+    conn.close()
+    return categories
+
 @app.route('/factures')
 def afficher_factures():
     """ Route pour afficher les factures de l'utilisateur """
@@ -315,10 +324,8 @@ def afficher_factures():
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
+    categories = get_categories()
 
-    # Catégories de factures
-    categories = ["Non-catégorisée", "Électricité", "Eau", "Internet", "Téléphone", "Assurance", "Autre"]
-    # Si la catégorie n'est pas dans la liste, on l'ajoute
     return render_template('factures.html', factures=factures, categories=categories)
 
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
@@ -352,11 +359,6 @@ def modifier_categorie(facture_id):
     conn.commit()
     conn.close()
     return redirect(url_for('afficher_factures'))
-
-#route pour les paramètres de l'utilisateur
-@app.route('/parametres')
-def parametres():
-    return render_template('parametres.html')
 
 
 # Route pour afficher les factures en format JSON
@@ -791,6 +793,64 @@ def injecter_pseudo():
     """ Route pour afficher le pseudo de l'utilisateur dans les templates """
     return {"pseudo": session.get("pseudo")}
 
+
+def get_categories_db():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    return conn
+
+@app.route('/categories')
+def afficher_categories():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row  # Permet d'accéder aux colonnes par nom
+    c = conn.cursor()
+
+    c.execute('SELECT * FROM categories WHERE id = ?', (session['id'],))
+    categories = c.fetchall()
+    conn.close()
+
+    return render_template('parametres.html', categories=categories)
+
+
+
+@app.route('/parametres', methods=['GET', 'POST'])
+def parametres():
+    if request.method == 'POST':
+        data = request.get_json()
+        print("DEBUG data reçue:", data)  # debug data reçue
+        utilisateur_id = session.get('utilisateur_id')
+        if not utilisateur_id:
+            return jsonify({"message": "Utilisateur non connecté"}), 401
+
+        if not data:
+            return jsonify({"message": "Aucune donnée reçue ou JSON malformé"}), 400
+
+        try:
+            conn = get_categories_db()
+            c = conn.cursor()
+            #c.execute('DELETE FROM categories WHERE utilisateur_id = ?', (utilisateur_id,))
+
+            for cat in data:
+                nom = cat.get('nom')
+                couleur = cat.get('couleur')
+                if nom and couleur:
+                    c.execute('INSERT INTO categories (utilisateur_id, nom_categorie, couleur) VALUES (?, ?, ?)',
+                              (utilisateur_id, nom, couleur))
+
+            conn.commit()
+            conn.close()
+            return jsonify({"message": "Catégories enregistrées avec succès"}), 200
+        except Exception as e:
+            print("Erreur lors de l'enregistrement des catégories:",e)
+            return jsonify({"message": "Erreur serveur lors de l'enregistrement"}), 500
+
+    return render_template('parametres.html')
+
+
+
+
+
+
 if __name__ == "__main__":
     import webbrowser
     # 🛠️ Création sécurisée du dossier uploads si manquant
@@ -806,45 +866,3 @@ if __name__ == "__main__":
     init_db()
     webbrowser.open('http://127.0.0.1:5000/login')
     app.run(debug=True, use_reloader=False)
-
-
-
-def get_categories_db():
-    conn = sqlite3.connect('categories.db')
-    conn.row_factory = sqlite3.Row
-    return conn
-
-
-
-@app.route('/parametres', methods=['GET', 'POST'])
-def parametres():
-    if request.method == 'POST':
-        data = request.get_json()
-        print("DEBUG data reçue:", data)  # debug data reçue
-        utilisateur_id = session.get('utilisateur_id')
-        if not utilisateur_id:
-            return jsonify({"message": "Utilisateur non connecté"}), 401
-        
-        if not data:
-            return jsonify({"message": "Aucune donnée reçue ou JSON malformé"}), 400
-
-        try:
-            conn = get_categories_db()
-            c = conn.cursor()
-            c.execute('DELETE FROM categories WHERE utilisateur_id = ?', (utilisateur_id,))
-
-            for cat in data:
-                nom = cat.get('nom')
-                couleur = cat.get('couleur')
-                if nom and couleur:
-                    c.execute('INSERT INTO categories (utilisateur_id, nom_categorie, couleur) VALUES (?, ?, ?)',
-                              (utilisateur_id, nom, couleur))
-
-            conn.commit()
-            conn.close()
-            return jsonify({"message": "Catégories enregistrées avec succès"}), 200
-        except Exception as e:
-            print("Erreur lors de l'enregistrement des catégories:")
-            return jsonify({"message": "Erreur serveur lors de l'enregistrement"}), 500
-
-    return render_template('parametres.html')

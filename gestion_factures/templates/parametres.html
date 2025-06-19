@@ -21,10 +21,9 @@
 </tr>
     </thead>
  <tbody>
-  {% for i in range(1, 11) %}
   <tr>
     <td>
-      <input type="text" class="category-input" placeholder="Catégorie {{ i }}" maxlength="50">
+      <input type="text" class="category-input" placeholder="Catégorie {{ 10 }}" maxlength="50">
     </td>
     <td>
       <div class="category-preview"></div>
@@ -45,7 +44,6 @@
       </select>
     </td>
   </tr>
-  {% endfor %}
 </tbody>
 
 <tfoot>
@@ -58,6 +56,28 @@
    
 </table>
 
+<br>
+<br>
+<br>
+
+<table id="categories-list">
+    <thead>
+<tr>
+    <th>Catégorie</th>
+    <th>Couleur</th>
+</tr>
+    </thead>
+ <tbody>
+{% for categorie in categories %}
+  <tr>
+    <td>{{ categorie['nom_categorie'] }}</td>  <!-- Exact nom de la colonne -->
+    <td>
+      <div class="category-preview" style="background-color: {{ categorie.couleur }};"></div>
+    </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
 
     {% include 'footer.html' %}
 
