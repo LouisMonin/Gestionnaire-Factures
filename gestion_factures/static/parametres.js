@@ -102,33 +102,33 @@ if (tbodyForm.children.length === 0) {
   tbodyForm.appendChild(createCategoryRow());
 }
 
+// Gestion du clic "Enregistrer"
 btnSave.addEventListener('click', () => {
+  const rows = tbodyForm.querySelectorAll('tr');
   const categories = [];
 
-  // 1. Récupère l'encart du haut
-  const newNom = document.getElementById('new-category-name').value.trim();
-  const newCouleur = document.getElementById('new-category-color').value;
+  for (const row of rows) {
+    const nom = row.querySelector('.category-input').value.trim();
+    const couleur = row.querySelector('.color-select').value;
 
-  if (newNom || newCouleur) {
-    if (!newNom) {
-      alert('Le nom de la catégorie est obligatoire.');
-      return;
+    if (nom || couleur) {
+      if (!nom) {
+        alert('Le nom de la catégorie est obligatoire.');
+        return;
+      }
+      if (!couleur) {
+        alert('La couleur est obligatoire.');
+        return;
+      }
+      categories.push({ nom, couleur });
     }
-    if (!newCouleur) {
-      alert('La couleur est obligatoire.');
-      return;
-    }
-    categories.push({ nom: newNom, couleur: newCouleur });
   }
 
-  // 2. (Optionnel) On pourrait aussi lire les lignes du tableau ici si tu veux.
-
   if (categories.length === 0) {
-    alert('Veuillez remplir une catégorie et une couleur.');
+    alert('Veuillez saisir au moins une catégorie avec une couleur.');
     return;
   }
 
-  // 3. Envoi vers Flask
   fetch('/parametres', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -142,13 +142,10 @@ btnSave.addEventListener('click', () => {
       return response.json();
     })
     .then(data => {
-      alert(data.message || 'Catégorie enregistrée avec succès.');
-      // On vide les champs après enregistrement
-      document.getElementById('new-category-name').value = '';
-      document.getElementById('new-category-color').value = '';
+      alert(data.message || 'Catégories enregistrées avec succès.');
       window.location.reload();
     })
     .catch(err => {
-      alert('Erreur lors de l\'enregistrement : ' + err.message);
+      alert('Erreur réseau ou serveur lors de l\'enregistrement : ' + err.message);
     });
 });
