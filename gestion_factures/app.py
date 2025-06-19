@@ -845,8 +845,8 @@ def parametres():
 
             for cat in data:
                 nom = cat.get('nom')
-                couleur = cat.get('couleur')
-                if nom and couleur:
+                couleur = cat.get('couleur', '')
+                if nom:
                     c.execute('INSERT INTO categories (utilisateur_id, nom_categorie, couleur) VALUES (?, ?, ?)',
                               (utilisateur_id, nom, couleur))
 

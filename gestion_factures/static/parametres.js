@@ -36,10 +36,10 @@ document.getElementById('save-categories-btn').addEventListener('click', () => {
 
   rows.forEach(row => {
     const nom = row.querySelector('.category-input').value.trim();
-    const couleur = row.querySelector('.color-select').value.trim();
+    //const couleur = row.querySelector('.color-select').value.trim();
 
-    if (nom && couleur) {
-      categories.push({ nom, couleur });
+    if (nom) {
+      categories.push({ nom});
     }
   });
 
