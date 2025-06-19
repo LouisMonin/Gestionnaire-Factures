@@ -40,6 +40,52 @@ def verifier_connexion():
     if request.endpoint in ['upload', 'afficher_factures', 'analyse'] and 'utilisateur_id' not in session:
         return redirect(url_for('login'))
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    """ Routes pour la gestion des utilisateurs """
+    if request.method == 'POST':
+        pseudo = request.form['pseudo']
+        mot_de_passe = request.form['mot_de_passe']
+        utilisateur = verifier_utilisateur(pseudo, mot_de_passe)
+
+        if utilisateur:
+            session['utilisateur_id'] = utilisateur[0]
+            session['pseudo'] = utilisateur[6]
+            return redirect('/')
+        else:
+            flash("❌ Profil inexistant ou mot de passe incorrect.", "error")
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """ Route pour l'inscription d'un nouvel utilisateur """
+    if request.method == 'POST':
+        success = ajouter_utilisateur(
+            request.form['nom'],
+            request.form['prenom'],
+            int(request.form['age']),
+            request.form['secteur'],
+            request.form['email'],
+            request.form['pseudo'],
+            request.form['mot_de_passe']
+        )
+        if success:
+            flash("✅ Compte créé avec succès. Connectez-vous.", "success")
+            return redirect('/login')
+        else:
+            flash("⚠️ Un compte existe déjà avec cette adresse email.", "error")
+            return redirect('/register')
+
+    return render_template('register.html')
+
+@app.route('/logout')
+def logout():
+    """ Route pour la déconnexion de l'utilisateur """
+    session.clear()
+    return redirect('/login')
+
 @app.route('/')
 def accueil():
     """Route principale de l'application : page d'accueil avec KPI si connecté"""
@@ -108,55 +154,6 @@ def accueil():
         factures_a_venir=factures_a_venir
     )
 
-
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    """ Routes pour la gestion des utilisateurs """
-    if request.method == 'POST':
-        pseudo = request.form['pseudo']
-        mot_de_passe = request.form['mot_de_passe']
-        utilisateur = verifier_utilisateur(pseudo, mot_de_passe)
-
-        if utilisateur:
-            session['utilisateur_id'] = utilisateur[0]
-            session['pseudo'] = utilisateur[6]
-            return redirect('/')
-        else:
-            flash("❌ Profil inexistant ou mot de passe incorrect.", "error")
-            return redirect(url_for('login'))
-
-    return render_template('login.html')
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    """ Route pour l'inscription d'un nouvel utilisateur """
-    if request.method == 'POST':
-        success = ajouter_utilisateur(
-            request.form['nom'],
-            request.form['prenom'],
-            int(request.form['age']),
-            request.form['secteur'],
-            request.form['email'],
-            request.form['pseudo'],
-            request.form['mot_de_passe']
-        )
-        if success:
-            flash("✅ Compte créé avec succès. Connectez-vous.", "success")
-            return redirect('/login')
-        else:
-            flash("⚠️ Un compte existe déjà avec cette adresse email.", "error")
-            return redirect('/register')
-
-    return render_template('register.html')
-
-@app.route('/logout')
-def logout():
-    """ Route pour la déconnexion de l'utilisateur """
-    session.clear()
-    return redirect('/login')
-
 """ Partie upload des factures """
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -216,7 +213,9 @@ def upload():
         flash("Facture enregistrée avec succès.", "success")
         return redirect(url_for('accueil'))
 
-    return render_template('upload.html')
+    categories = get_categories()
+    return render_template('upload.html', categories=categories)
+
 
 """ Routes pour l'analyse des factures via OCR pour PDF """
 
@@ -314,6 +313,19 @@ def get_categories():
     categories = cursor.fetchall()
     conn.close()
     return categories
+
+def get_user_categories():
+    conn = sqlite3.connect('categories.db')
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT nom_categorie, couleur FROM categories WHERE utilisateur_id = ?",
+        (session['utilisateur_id'],)
+    )
+    categories = cursor.fetchall()
+    conn.close()
+    return categories
+
 
 @app.route('/factures')
 def afficher_factures():

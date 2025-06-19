@@ -33,12 +33,9 @@
         <label>Catégorie :
           <select name="categorie" id="categorie">
             <option value="Non-catégorisée">Non-catégorisée</option>
-            <option value="Électricité">Électricité</option>
-            <option value="Eau">Eau</option>
-            <option value="Internet">Internet</option>
-            <option value="Téléphone">Téléphone</option>
-            <option value="Assurance">Assurance</option>
-            <option value="Autre">Autre</option>
+            {% for cat in categories %}
+              <option value="{{ cat['nom_categorie'] }}">{{ cat['nom_categorie'] }}</option>
+            {% endfor %}
           </select>
         </label>
         <label>Total HT :
