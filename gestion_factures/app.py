@@ -377,7 +377,7 @@ def ajouter_categorie():
 
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
-    c.execute('INSERT INTO categorisation (utilisateur_id, nom_categorie) VALUES (?, ?)',
+    c.execute('INSERT INTO categorisation (utilisateur_id, nom_categories) VALUES (?, ?)',
               (session['utilisateur_id'], nouvelle_categorie))
     conn.commit()
     conn.close()
