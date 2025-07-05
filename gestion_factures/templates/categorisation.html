@@ -40,18 +40,17 @@
       <tbody>
   <tr>
     <td>
-      <input type="text" class="category-input" placeholder="Catégorie" maxlength="25">
+    <form method="POST" action="/ajouter_categorie">
+       <input type="text" name="enregistrement_categorie" placeholder="Nom de la catégorie" required>
+          <button type="submit">Ajouter</button>
+      </form>    
     </td>
 
   </tr>
 </tbody>
 
 <tfoot>
-  <tr>
-    <td colspan="4" style="text-align:right;">
-      <button id="save-categories-btn">Enregistrer</button>
-    </td>
-  </tr>
+
 </tfoot>
 
     </div>

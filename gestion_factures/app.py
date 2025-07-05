@@ -370,6 +370,19 @@ def supprimer_categorie(id):
     conn.close()
     return redirect('/categorisation')
 
+@app.route('/ajouter_categorie', methods=['POST'])
+def ajouter_categorie():
+    """ Route pour ajouter une nouvelle catégorie """
+    nouvelle_categorie = request.form.get('enregistrement_categorie')
+
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+    c.execute('INSERT INTO categorisation (utilisateur_id, nom_categorie) VALUES (?, ?)',
+              (session['utilisateur_id'], nouvelle_categorie))
+    conn.commit()
+    conn.close()
+    flash("✅ Catégorie ajoutée avec succès.", "success")
+    return redirect('/categorisation')
 
 
 
