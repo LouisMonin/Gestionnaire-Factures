@@ -9,7 +9,7 @@
 # """
 
 from flask import Flask, jsonify, render_template, request, redirect, flash, url_for, session, make_response, send_from_directory
-from database import init_db, insert_facture, ajouter_utilisateur, verifier_utilisateur
+from database import init_db, insert_facture, ajouter_utilisateur, verifier_utilisateur, ajouter_categorie
 import os
 import pytesseract
 from PIL import Image
@@ -341,6 +341,23 @@ def afficher_factures():
 
     return render_template('factures.html', factures=factures, categories=categories)
 
+### CATÉGORISATION DES FACTURES ###
+# Affichage Cat
+@app.route('/categorisation')
+def afficher_categorisation():
+    """ Route pour afficher les catégories de l'utilisateur """
+    conn = sqlite3.connect('factures.db')
+    conn.row_factory = sqlite3.Row
+    c = conn.cursor()
+    c.execute('SELECT * FROM categorisation WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    categorisation = c.fetchall()
+    conn.close()
+    return render_template('categorisation.html', categorisation=categorisation)
+
+
+
+
+
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
 def toggle_payee(facture_id):
     """ Met à jour l'état 'payée' d'une facture selon la case cochée """
@@ -372,6 +389,8 @@ def modifier_categorie(facture_id):
     conn.commit()
     conn.close()
     return redirect(url_for('afficher_factures'))
+
+
 
 
 # Route pour afficher les factures en format JSON
@@ -857,6 +876,7 @@ def parametres():
             return jsonify({"message": "Erreur serveur lors de l'enregistrement"}), 500
 
     return render_template('parametres.html')
+
 
 
 

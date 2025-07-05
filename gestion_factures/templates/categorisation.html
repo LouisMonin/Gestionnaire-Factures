@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <title>Catégoriesn Enregistrées</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  </head>
+  <body>
+    {% include 'header.html' %}
+
+    <div class="container">
+      <h1>Liste des catégories</h1>
+
+      <table id="table-categories">
+        <thead>
+            <tr>
+                <th>Nom de la catégorie</th>
+            </tr>
+        </thead>
+
+        <tbody>
+          {% for f in factures %}
+            <tr>
+              <td>
+                {% if f['nom_fichier'] %}
+                    {{ f['id'] }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div>
+
+    {% include 'footer.html' %}
+    <script src="{{ url_for('static', filename='categorisation.js') }}"></script>
+  </body>
+</html>

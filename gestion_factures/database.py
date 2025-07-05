@@ -34,19 +34,6 @@ def init_db():
         FOREIGN KEY (utilisateur_id) REFERENCES utilisateurs(id)
     )''')
 
-    # Migration pour ajouter la colonne categorie si elle n'existe pas déjà
-    try:
-        c.execute('ALTER TABLE factures ADD COLUMN categorie TEXT DEFAULT "Non-catégorisée"')
-        print("✅ Colonne 'categorie' ajoutée à la table factures")
-    except sqlite3.OperationalError as e:
-        if "duplicate column name" in str(e).lower():
-            print("ℹ️ Colonne 'categorie' déjà présente dans la table factures")
-        else:
-            print(f"❌ Erreur lors de l'ajout de la colonne categorie : {e}")
-
-    conn.commit()
-    conn.close()
-
 # Fonction pour insérer une facture dans la base de données
 def insert_facture(
     fournisseur,
@@ -120,3 +107,17 @@ def verifier_utilisateur(pseudo, mot_de_passe):
     utilisateur = c.fetchone()
     conn.close()
     return utilisateur
+
+#### Ajout d'une catégorie
+def ajouter_categorie(
+        utilisateur_id, nom_categories):
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+    c.execute('''
+              INSERT INTO categorisation(utilisateur_id, nom_categories) 
+              VALUES (?,?)
+              ''', 
+              (utilisateur_id, nom_categories))
+    conn.commit()
+    conn.close()
+    return True
