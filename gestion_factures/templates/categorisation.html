@@ -19,12 +19,9 @@
         </thead>
 
         <tbody>
-          {% for f in factures %}
+          {% for c in categorisation %}
             <tr>
-              <td>
-                {% if f['nom_fichier'] %}
-                    {{ f['id'] }}
-              </td>
+              <td>{{ c['nom_categories'] }}</td>
             </tr>
           {% endfor %}
         </tbody>
