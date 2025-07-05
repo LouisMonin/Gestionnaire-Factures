@@ -15,6 +15,7 @@
         <thead>
             <tr>
                 <th>Nom de la catégorie</th>
+                <th>Supprimer une catégorie</th>
             </tr>
         </thead>
 
@@ -22,10 +23,36 @@
           {% for c in categorisation %}
             <tr>
               <td>{{ c['nom_categories'] }}</td>
+              <td>
+                <form method="POST" action="/supprimer_categorie/{{ c['nom_categories'] }}"onsubmit="return confirm('Confirmer la suppression ?');">
+                  <button type="submit" class="danger">X</button>
+                </form>
+              </td>
             </tr>
           {% endfor %}
         </tbody>
       </table>
+     
+ <tr>
+    <th>Ajouter une catégorie</th>
+</tr>
+     
+      <tbody>
+  <tr>
+    <td>
+      <input type="text" class="category-input" placeholder="Catégorie" maxlength="25">
+    </td>
+
+  </tr>
+</tbody>
+
+<tfoot>
+  <tr>
+    <td colspan="4" style="text-align:right;">
+      <button id="save-categories-btn">Enregistrer</button>
+    </td>
+  </tr>
+</tfoot>
 
     </div>
 

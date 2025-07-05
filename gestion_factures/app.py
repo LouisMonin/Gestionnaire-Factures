@@ -341,8 +341,13 @@ def afficher_factures():
 
     return render_template('factures.html', factures=factures, categories=categories)
 
+#############################################################
+#############################################################
+#############################################################
+#############################################################
 ### CATÉGORISATION DES FACTURES ###
-# Affichage Cat
+
+# Affichage Catégorie
 @app.route('/categorisation')
 def afficher_categorisation():
     """ Route pour afficher les catégories de l'utilisateur """
@@ -354,6 +359,16 @@ def afficher_categorisation():
     conn.close()
     return render_template('categorisation.html', categorisation=categorisation)
 
+# Supprimer une catégorie
+@app.route('/supprimer_categorie/<int:id>', methods=['POST'])
+def supprimer_categorie(id):
+    """ Route pour supprimer une categorie spécifique """
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+    c.execute('DELETE FROM categories WHERE id = ? AND utilisateur_id = ?', (id, session['utilisateur_id']))
+    conn.commit()
+    conn.close()
+    return redirect('/categorisation')
 
 
 
@@ -421,6 +436,17 @@ def json_visuel():
     return render_template("factures_json.html", factures=[{
         "fournisseur": f['fournisseur'], "date_facture": f['date_facture'], "echeance": f['echeance'], "TVA": f['TVA'], "montant_total": f['montant_total']
     } for f in factures])
+
+
+#############################################################
+#############################################################
+#############################################################
+#############################################################
+##################### ANALYSE ###############################
+#############################################################
+#############################################################
+#############################################################
+#############################################################
 
 # Route pour analyser les factures
 @app.route('/analyse', methods=['GET', 'POST'])
