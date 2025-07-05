@@ -24,7 +24,7 @@
             <tr>
               <td>{{ c['nom_categories'] }}</td>
               <td>
-                <form method="POST" action="/supprimer_categorie/{{ c['nom_categories'] }}"onsubmit="return confirm('Confirmer la suppression ?');">
+                <form method="POST" action="/supprimer_categorie/{{ c['id'] }}"onsubmit="return confirm('Confirmer la suppression ?');">
                   <button type="submit" class="danger">X</button>
                 </form>
               </td>

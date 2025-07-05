@@ -365,7 +365,7 @@ def supprimer_categorie(id):
     """ Route pour supprimer une categorie spécifique """
     conn = sqlite3.connect('factures.db')
     c = conn.cursor()
-    c.execute('DELETE FROM categories WHERE id = ? AND utilisateur_id = ?', (id, session['utilisateur_id']))
+    c.execute('DELETE FROM categories WHERE id = ? AND utilisateur_id = ? ', (id, session['utilisateur_id']))
     conn.commit()
     conn.close()
     return redirect('/categorisation')
