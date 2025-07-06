@@ -306,6 +306,8 @@ def extraire_infos(texte):
         "total_ht": extract_first_matching(["total ht"], lines)
     }
 
+
+@app.route('/factures')
 #Corrigé pour categorisation à voir si c'est utilisé
 def get_categories():
     conn = sqlite3.connect('factures.db')
@@ -317,7 +319,7 @@ def get_categories():
     )    
     liste_categories = cursor.fetchall()
     conn.close()
-    return liste_categories
+    return render_template('factures.html',  liste_categories=liste_categories)
 
 def get_user_categories():
     conn = sqlite3.connect('factures.db')
@@ -331,20 +333,6 @@ def get_user_categories():
     conn.close()
     return categories
 # À priori pas utilisée, mais peut être utile pour l'affichage des catégories dans le template upload.html
-
-@app.route('/factures')
-def afficher_factures():
-    """ Route pour afficher les factures de l'utilisateur """
-    conn = sqlite3.connect('factures.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
-    factures = c.fetchall()
-    conn.close()
-    categories = get_categories()
-
-    return render_template('factures.html', factures=factures, categories=categories)
-
 
 ### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
@@ -417,7 +405,7 @@ def modifier_categorie(facture_id):
     c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', (nouvelle_categorie, facture_id, session['utilisateur_id']))
 
 # ✅ Fetch categorisation list
-    c.execute('SELECT nom_categories FROM categories WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    c.execute('SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     categorisation = c.fetchall()
 
     conn.close()
