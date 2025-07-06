@@ -311,10 +311,13 @@ def get_categories():
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?", (session['utilisateur_id'],))
-    categories = cursor.fetchall()
+    cursor.execute(
+        "SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?",
+        (session['utilisateur_id'],)
+    )    
+    liste_categories = cursor.fetchall()
     conn.close()
-    return categories
+    return liste_categories
 
 def get_user_categories():
     conn = sqlite3.connect('factures.db')
@@ -407,15 +410,19 @@ def toggle_payee(facture_id):
 
 @app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
 def modifier_categorie(facture_id):
-    nouvelle_categorie = request.form.get('categorie')
+    nouvelle_categorie = request.form.get('changement_categorie')
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
     c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', (nouvelle_categorie, facture_id, session['utilisateur_id']))
 
-    conn.commit()
+# ✅ Fetch categorisation list
+    c.execute('SELECT nom_categories FROM categories WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    categorisation = c.fetchall()
+
     conn.close()
-    return redirect(url_for('afficher_factures'))
+
+    return render_template('factures.html', categorisation=categorisation)
 
 
 

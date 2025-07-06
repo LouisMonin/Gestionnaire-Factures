@@ -98,10 +98,9 @@
               </td>
               <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
                 <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
-                  <select name="categorie" onchange="this.form.submit()">
-                    {% for cat in categorisation %}
-                      <option value="{{ cat['nom_categories'] }}" {% if f['categorie'] == cat['nom_categories'] %}selected{% endif %}>
-                        {{ cat['nom_categories'] }}
+                  <select name="changement_categorie" onchange="this.form.submit()">
+                    {% for c in categorisation %}
+                      <option value="{{ c['nom_categories'] }}"
                       </option>
                     {% endfor %}
                   </select>
