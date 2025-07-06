@@ -62,8 +62,8 @@
               <div class="filter-group" style="display:none;">
                 <select class="filter-input" data-col="9" style="text-align: center; text-align-last: center;">
                   <option value="">Toutes</option>
-                  {% for cat in categories %}
-                    <option value="{{ cat['nom_categorie'] }}">{{ cat['nom_categorie'] }}</option>
+                  {% for cat in categorisation %}
+                    <option value="{{ cat['nom_categories'] }}">{{ cat['nom_categories'] }}</option>
                   {% endfor %}
                 </select>
               </div>
@@ -99,9 +99,9 @@
               <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
                 <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
                   <select name="categorie" onchange="this.form.submit()">
-                    {% for cat in categories %}
-                      <option value="{{ cat['nom_categorie'] }}" {% if f['categorie'] == cat['nom_categorie'] %}selected{% endif %}>
-                        {{ cat['nom_categorie'] }}
+                    {% for cat in categorisation %}
+                      <option value="{{ cat['nom_categories'] }}" {% if f['categorie'] == cat['nom_categories'] %}selected{% endif %}>
+                        {{ cat['nom_categories'] }}
                       </option>
                     {% endfor %}
                   </select>
