@@ -334,27 +334,7 @@ def afficher_factures():
 
     return render_template('factures.html', factures=factures, categories=categories)
 
-@app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
-def modifier_categorie(facture_id):
-    nouvelle_categorie = request.form.get('changement_categorie')
-    utilisateur_id = session.get('utilisateur_id')
-    if not utilisateur_id:
-        # Handle not logged in, redirect or error
-        return redirect(url_for('login'))  # or wherever
 
-    conn = sqlite3.connect('factures.db')
-    c = conn.cursor()
-
-    # Update the category for the given facture and user
-    c.execute(
-        'UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?',
-        (nouvelle_categorie, facture_id, utilisateur_id)
-    )
-    conn.commit()
-    conn.close()
-
-    # After update, redirect back to the factures page
-    return redirect(url_for('afficher_factures'))
 ### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
 # Affichage Catégorie
@@ -394,6 +374,24 @@ def ajouter_categorie():
     conn.close()
     return redirect('/categorisation')
 
+#Changement de catégorie d'une facture (donc lien avec factures.html)
+@app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
+def modifier_categorie(facture_id):
+    nouvelle_categorie = request.form.get('changement_categorie')
+    utilisateur_id = session.get('utilisateur_id')
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+
+    # Update the category for the given facture and user
+    c.execute(
+        'UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?',
+        (nouvelle_categorie, facture_id, utilisateur_id)
+    )
+    conn.commit()
+    conn.close()
+
+    # After update, redirect back to the factures page
+    return redirect(url_for('afficher_factures'))
 ### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
 
