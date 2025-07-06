@@ -306,27 +306,28 @@ def extraire_infos(texte):
         "total_ht": extract_first_matching(["total ht"], lines)
     }
 
+#Corrigé pour categorisation à voir si c'est utilisé
 def get_categories():
-    conn = sqlite3.connect('categories.db')
+    conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT nom_categorie FROM categories")
+    cursor.execute("SELECT nom_categorie FROM categorisation WHERE utilisateur_id = ?", (session['utilisateur_id'],))
     categories = cursor.fetchall()
     conn.close()
     return categories
 
 def get_user_categories():
-    conn = sqlite3.connect('categories.db')
+    conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT nom_categorie FROM categories WHERE utilisateur_id = ?",
+        "SELECT nom_categorie FROM categorisation WHERE utilisateur_id = ?",
         (session['utilisateur_id'],)
     )
     categories = cursor.fetchall()
     conn.close()
     return categories
-
+# À priori pas utilisée, mais peut être utile pour l'affichage des catégories dans le template upload.html
 
 @app.route('/factures')
 def afficher_factures():
@@ -341,11 +342,8 @@ def afficher_factures():
 
     return render_template('factures.html', factures=factures, categories=categories)
 
-#############################################################
-#############################################################
-#############################################################
-#############################################################
-### CATÉGORISATION DES FACTURES ###
+
+### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
 # Affichage Catégorie
 @app.route('/categorisation')
@@ -370,6 +368,7 @@ def supprimer_categorie(id):
     conn.close()
     return redirect('/categorisation')
 
+# Ajouter une nouvelle catégorie
 @app.route('/ajouter_categorie', methods=['POST'])
 def ajouter_categorie():
     """ Route pour ajouter une nouvelle catégorie """
@@ -381,9 +380,9 @@ def ajouter_categorie():
               (session['utilisateur_id'], nouvelle_categorie))
     conn.commit()
     conn.close()
-    flash("✅ Catégorie ajoutée avec succès.", "success")
     return redirect('/categorisation')
 
+### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
 
 @app.route('/toggle_payee/<int:facture_id>', methods=['POST'])
