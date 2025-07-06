@@ -311,7 +311,7 @@ def get_categories():
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    cursor.execute("SELECT nom_categorie FROM categorisation WHERE utilisateur_id = ?", (session['utilisateur_id'],))
+    cursor.execute("SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?", (session['utilisateur_id'],))
     categories = cursor.fetchall()
     conn.close()
     return categories
@@ -321,7 +321,7 @@ def get_user_categories():
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT nom_categorie FROM categorisation WHERE utilisateur_id = ?",
+        "SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?",
         (session['utilisateur_id'],)
     )
     categories = cursor.fetchall()
