@@ -306,19 +306,6 @@ def extraire_infos(texte):
         "total_ht": extract_first_matching(["total ht"], lines)
     }
 
-#Corrigé pour categorisation à voir si c'est utilisé
-def get_categories():
-    conn = sqlite3.connect('factures.db')
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute(
-        "SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?",
-        (session['utilisateur_id'],)
-    )    
-    liste_categories = cursor.fetchall()
-    conn.close()
-    return liste_categories
-
 
 #Utilisé par Louis a priori
 def get_user_categories():
@@ -343,11 +330,31 @@ def afficher_factures():
     c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
     factures = c.fetchall()
     conn.close()
-    categories = get_categories()
+    categories = get_user_categories()
 
     return render_template('factures.html', factures=factures, categories=categories)
 
+@app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
+def modifier_categorie(facture_id):
+    nouvelle_categorie = request.form.get('changement_categorie')
+    utilisateur_id = session.get('utilisateur_id')
+    if not utilisateur_id:
+        # Handle not logged in, redirect or error
+        return redirect(url_for('login'))  # or wherever
 
+    conn = sqlite3.connect('factures.db')
+    c = conn.cursor()
+
+    # Update the category for the given facture and user
+    c.execute(
+        'UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?',
+        (nouvelle_categorie, facture_id, utilisateur_id)
+    )
+    conn.commit()
+    conn.close()
+
+    # After update, redirect back to the factures page
+    return redirect(url_for('afficher_factures'))
 ### ----------------------------------------------------CATÉGORISATION DES FACTURES ###
 
 # Affichage Catégorie
@@ -409,33 +416,6 @@ def toggle_payee(facture_id):
     conn.close()
 
     return redirect(url_for('afficher_factures'))
-
-@app.route('/modifier_categorie/<int:facture_id>', methods=['POST'])
-def modifier_categorie(facture_id):
-    nouvelle_categorie = request.form.get('changement_categorie')
-    conn = sqlite3.connect('factures.db')
-    conn.row_factory = sqlite3.Row
-    c = conn.cursor()
-    # Update the category
-    c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', 
-              (nouvelle_categorie, facture_id, session['utilisateur_id']))
-
-    # Fetch updated factures
-    c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
-    factures = c.fetchall()
-
-    # Fetch categories
-    c.execute('SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?', 
-              (session['utilisateur_id'],))
-    categorisation = c.fetchall()
-
-    conn.commit()
-    conn.close()
-
-    return render_template('factures.html', factures = factures, categorisation=categorisation)
-
-
-
 
 # Route pour afficher les factures en format JSON
 @app.route('/factures/json')

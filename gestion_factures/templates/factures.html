@@ -99,7 +99,7 @@
               <td class="categorie-cell {{ f['categorie']|lower|replace(' ', '_')|replace('é', 'e')|replace('-', '_') }}">
                 <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
                   <select name="changement_categorie" onchange="this.form.submit()">
-                    {% for c in categorisation %}
+                    {% for c in categories %}
                       <option value="{{ c['nom_categories'] }}">{{ c['nom_categories'] }}</option>
                     {% endfor %}
                   </select>
@@ -125,7 +125,6 @@
         <button id="nextPage">Suivante</button>
       </div>
     </div>
-
     {% include 'footer.html' %}
     <script src="{{ url_for('static', filename='factures.js') }}"></script>
   </body>
