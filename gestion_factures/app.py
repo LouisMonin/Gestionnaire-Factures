@@ -319,6 +319,8 @@ def get_categories():
     conn.close()
     return liste_categories
 
+
+#Utilisé par Louis a priori
 def get_user_categories():
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
@@ -414,15 +416,23 @@ def modifier_categorie(facture_id):
     conn = sqlite3.connect('factures.db')
     conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', (nouvelle_categorie, facture_id, session['utilisateur_id']))
+    # Update the category
+    c.execute('UPDATE factures SET categorie = ? WHERE id = ? AND utilisateur_id = ?', 
+              (nouvelle_categorie, facture_id, session['utilisateur_id']))
 
-# ✅ Fetch categorisation list
-    c.execute('SELECT nom_categories FROM categories WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    # Fetch updated factures
+    c.execute('SELECT * FROM factures WHERE utilisateur_id = ?', (session['utilisateur_id'],))
+    factures = c.fetchall()
+
+    # Fetch categories
+    c.execute('SELECT nom_categories FROM categorisation WHERE utilisateur_id = ?', 
+              (session['utilisateur_id'],))
     categorisation = c.fetchall()
 
+    conn.commit()
     conn.close()
 
-    return render_template('factures.html', categorisation=categorisation)
+    return render_template('factures.html', factures = factures, categorisation=categorisation)
 
 
 

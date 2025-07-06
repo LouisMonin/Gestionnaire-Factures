@@ -100,8 +100,7 @@
                 <form method="POST" action="{{ url_for('modifier_categorie', facture_id=f['id']) }}">
                   <select name="changement_categorie" onchange="this.form.submit()">
                     {% for c in categorisation %}
-                      <option value="{{ c['nom_categories'] }}"
-                      </option>
+                      <option value="{{ c['nom_categories'] }}">{{ c['nom_categories'] }}</option>
                     {% endfor %}
                   </select>
                 </form>
